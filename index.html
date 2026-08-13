@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador de Manipulador Robótico</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #172033;
+    }
+
+    header {
+      background: #073763;
+      color: white;
+      padding: 18px 24px;
+      text-align: center;
+      border-bottom: 5px solid #f4b400;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+      max-width: 1400px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: #073763;
+    }
+
+    .control {
+      margin-bottom: 22px;
+    }
+
+    .control label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .angle-value {
+      font-size: 14px;
+      margin-top: 4px;
+      color: #555;
+    }
+
+    .buttons {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      background: #073763;
+      color: white;
+      padding: 11px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0b4d88;
+    }
+
+    .status {
+      margin-top: 18px;
+      background: #eef4fa;
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .status p {
+      margin: 6px 0;
+    }
+
+    .warning {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #fff3cd;
+      color: #7a5900;
+      display: none;
+      font-weight: bold;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      min-height: 650px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 650px;
+      background: white;
+      border-radius: 14px;
+      display: block;
+    }
+
+    .legend {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(255,255,255,0.92);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .legend div {
+      margin: 4px 0;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 7px;
+    }
+
+    @media (max-width: 850px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      canvas {
+        height: 500px;
+      }
+
+      .canvas-wrapper {
+        min-height: 500px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Simulador de Manipulador Robótico</h1>
+  <p>Cinemática direta, espaço cartesiano, workspace e singularidades</p>
+</header>
+
+<div class="container">
+
+  <div class="panel">
+
+    <h2>Controle das juntas</h2>
+
+    <div class="control">
+      <label for="theta1">Junta 1</label>
+      <input type="range" id="theta1" min="-180" max="180" value="30">
+      <div class="angle-value">
+        Ângulo: <span id="value1">30</span>°
+      </div>
+    </div>
+
+    <div class="control">
+      <label for="theta2">Junta 2</label>
+      <input type="range" id="theta2" min="-180" max="180" value="-40">
+      <div class="angle-value">
+        Ângulo: <span id="value2">-40</span>°
+      </div>
+    </div>
+
+    <div class="control">
+      <label for="theta3">Junta 3</label>
+      <input type="range" id="theta3" min="-180" max="180" value="20">
+      <div class="angle-value">
+        Ângulo: <span id="value3">20</span>°
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="workspaceBtn">Mostrar workspace</button>
+      <button id="trailBtn">Mostrar trajetória</button>
+      <button id="clearTrailBtn">Limpar trajetória</button>
+      <button id="resetBtn">Posição inicial</button>
+    </div>
+
+    <div class="status">
+      <p><strong>Posição do efetuador</strong></p>
+      <p>X = <span id="xPosition">0.00</span></p>
+      <p>Y = <span id="yPosition">0.00</span></p>
+      <p>Orientação = <span id="orientation">0.00</span>°</p>
+    </div>
+
+    <div class="warning" id="singularityWarning">
+      Atenção: configuração próxima de uma singularidade.
+    </div>
+
+  </div>
+
+  <div class="canvas-wrapper">
+
+    <canvas id="robotCanvas"></canvas>
+
+    <div class="legend">
+      <div><span class="dot" style="background:#073763"></span>Elos</div>
+      <div><span class="dot" style="background:#f4b400"></span>Juntas</div>
+      <div><span class="dot" style="background:#c62828"></span>Efetuador</div>
+      <div><span class="dot" style="background:#6a1b9a"></span>Trajetória</div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("robotCanvas");
+const ctx = canvas.getContext("2d");
+
+const theta1Slider = document.getElementById("theta1");
+const theta2Slider = document.getElementById("theta2");
+const theta3Slider = document.getElementById("theta3");
+
+const value1 = document.getElementById("value1");
+const value2 = document.getElementById("value2");
+const value3 = document.getElementById("value3");
+
+const xPosition = document.getElementById("xPosition");
+const yPosition = document.getElementById("yPosition");
+const orientationDisplay = document.getElementById("orientation");
+
+const warning = document.getElementById("singularityWarning");
+
+const workspaceBtn = document.getElementById("workspaceBtn");
+const trailBtn = document.getElementById("trailBtn");
+const clearTrailBtn = document.getElementById("clearTrailBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+let showWorkspace = false;
+let showTrail = false;
+
+let trail = [];
+
+const L1 = 150;
+const L2 = 120;
+const L3 = 90;
+
+let scale = 1;
+
+function resizeCanvas() {
+
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+
+  ctx.setTransform(
+    window.devicePixelRatio,
+    0,
+    0,
+    window.devicePixelRatio,
+    0,
+    0
+  );
+
+  draw();
+}
+
+window.addEventListener("resize", resizeCanvas);
+
+function degToRad(deg) {
+  return deg * Math.PI / 180;
+}
+
+function calculateRobot() {
+
+  const t1 = degToRad(Number(theta1Slider.value));
+  const t2 = degToRad(Number(theta2Slider.value));
+  const t3 = degToRad(Number(theta3Slider.value));
+
+  const x1 = L1 * Math.cos(t1);
+  const y1 = L1 * Math.sin(t1);
+
+  const x2 = x1 + L2 * Math.cos(t1 + t2);
+  const y2 = y1 + L2 * Math.sin(t1 + t2);
+
+  const x3 = x2 + L3 * Math.cos(t1 + t2 + t3);
+  const y3 = y2 + L3 * Math.sin(t1 + t2 + t3);
+
+  return {
+    t1,
+    t2,
+    t3,
+    x1,
+    y1,
+    x2,
+    y2,
+    x3,
+    y3
+  };
+}
+
+function drawGrid(originX, originY) {
+
+  ctx.save();
+
+  ctx.strokeStyle = "#e8e8e8";
+  ctx.lineWidth = 1;
+
+  const spacing = 50;
+
+  for (let x = originX % spacing; x < canvas.clientWidth; x += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.clientHeight);
+    ctx.stroke();
+  }
+
+  for (let y = originY % spacing; y < canvas.clientHeight; y += spacing) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.clientWidth, y);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawAxes(originX, originY) {
+
+  ctx.lineWidth = 2;
+
+  ctx.strokeStyle = "#c62828";
+
+  ctx.beginPath();
+  ctx.moveTo(originX, originY);
+  ctx.lineTo(originX + 80, originY);
+  ctx.stroke();
+
+  ctx.fillStyle = "#c62828";
+  ctx.font = "bold 14px Arial";
+  ctx.fillText("X", originX + 88, originY + 5);
+
+  ctx.strokeStyle = "#2e7d32";
+
+  ctx.beginPath();
+  ctx.moveTo(originX, originY);
+  ctx.lineTo(originX, originY - 80);
+  ctx.stroke();
+
+  ctx.fillStyle = "#2e7d32";
+  ctx.fillText("Y", originX - 6, originY - 90);
+}
+
+function drawWorkspace(originX, originY) {
+
+  const radius = L1 + L2 + L3;
+
+  ctx.save();
+
+  ctx.beginPath();
+
+  ctx.arc(
+    originX,
+    originY,
+    radius,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle = "rgba(106,27,154,0.08)";
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(106,27,154,0.45)";
+  ctx.setLineDash([7,7]);
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawTrail(originX, originY) {
+
+  if (!showTrail || trail.length < 2) return;
+
+  ctx.save();
+
+  ctx.strokeStyle = "#6a1b9a";
+  ctx.lineWidth = 3;
+
+  ctx.beginPath();
+
+  trail.forEach((point, index) => {
+
+    const px = originX + point.x;
+    const py = originY - point.y;
+
+    if (index === 0) {
+      ctx.moveTo(px, py);
+    } else {
+      ctx.lineTo(px, py);
+    }
+  });
+
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawLink(x1, y1, x2, y2) {
+
+  ctx.save();
+
+  ctx.strokeStyle = "#073763";
+  ctx.lineWidth = 18;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawJoint(x, y) {
+
+  ctx.save();
+
+  ctx.beginPath();
+  ctx.arc(x, y, 13, 0, Math.PI * 2);
+
+  ctx.fillStyle = "#f4b400";
+  ctx.fill();
+
+  ctx.strokeStyle = "#073763";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawEndEffector(x, y, angle) {
+
+  ctx.save();
+
+  ctx.translate(x, y);
+  ctx.rotate(-angle);
+
+  ctx.fillStyle = "#c62828";
+
+  ctx.beginPath();
+  ctx.arc(0, 0, 10, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#c62828";
+  ctx.lineWidth = 5;
+
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(24, -12);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(24, 12);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function checkSingularity(robot) {
+
+  const angle2 = Number(theta2Slider.value);
+  const angle3 = Number(theta3Slider.value);
+
+  const nearStraight =
+    Math.abs(angle2) < 7 &&
+    Math.abs(angle3) < 7;
+
+  const nearFolded =
+    Math.abs(Math.abs(angle2) - 180) < 7;
+
+  if (nearStraight || nearFolded) {
+    warning.style.display = "block";
+  } else {
+    warning.style.display = "none";
+  }
+}
+
+function draw() {
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.clientWidth,
+    canvas.clientHeight
+  );
+
+  const originX = canvas.clientWidth * 0.48;
+  const originY = canvas.clientHeight * 0.72;
+
+  drawGrid(originX, originY);
+
+  if (showWorkspace) {
+    drawWorkspace(originX, originY);
+  }
+
+  drawAxes(originX, originY);
+
+  const robot = calculateRobot();
+
+  const p0 = {
+    x: originX,
+    y: originY
+  };
+
+  const p1 = {
+    x: originX + robot.x1,
+    y: originY - robot.y1
+  };
+
+  const p2 = {
+    x: originX + robot.x2,
+    y: originY - robot.y2
+  };
+
+  const p3 = {
+    x: originX + robot.x3,
+    y: originY - robot.y3
+  };
+
+  drawTrail(originX, originY);
+
+  drawLink(p0.x, p0.y, p1.x, p1.y);
+  drawLink(p1.x, p1.y, p2.x, p2.y);
+  drawLink(p2.x, p2.y, p3.x, p3.y);
+
+  drawJoint(p0.x, p0.y);
+  drawJoint(p1.x, p1.y);
+  drawJoint(p2.x, p2.y);
+
+  drawEndEffector(
+    p3.x,
+    p3.y,
+    robot.t1 + robot.t2 + robot.t3
+  );
+
+  value1.textContent = theta1Slider.value;
+  value2.textContent = theta2Slider.value;
+  value3.textContent = theta3Slider.value;
+
+  xPosition.textContent = robot.x3.toFixed(1);
+  yPosition.textContent = robot.y3.toFixed(1);
+
+  const orientation =
+    Number(theta1Slider.value) +
+    Number(theta2Slider.value) +
+    Number(theta3Slider.value);
+
+  orientationDisplay.textContent =
+    orientation.toFixed(1);
+
+  checkSingularity(robot);
+}
+
+function updateRobot() {
+
+  const robot = calculateRobot();
+
+  if (showTrail) {
+
+    trail.push({
+      x: robot.x3,
+      y: robot.y3
+    });
+
+    if (trail.length > 700) {
+      trail.shift();
+    }
+  }
+
+  draw();
+}
+
+theta1Slider.addEventListener("input", updateRobot);
+theta2Slider.addEventListener("input", updateRobot);
+theta3Slider.addEventListener("input", updateRobot);
+
+workspaceBtn.addEventListener("click", () => {
+
+  showWorkspace = !showWorkspace;
+
+  workspaceBtn.textContent =
+    showWorkspace
+      ? "Ocultar workspace"
+      : "Mostrar workspace";
+
+  draw();
+});
+
+trailBtn.addEventListener("click", () => {
+
+  showTrail = !showTrail;
+
+  trailBtn.textContent =
+    showTrail
+      ? "Parar trajetória"
+      : "Mostrar trajetória";
+
+  draw();
+});
+
+clearTrailBtn.addEventListener("click", () => {
+  trail = [];
+  draw();
+});
+
+resetBtn.addEventListener("click", () => {
+
+  theta1Slider.value = 30;
+  theta2Slider.value = -40;
+  theta3Slider.value = 20;
+
+  trail = [];
+
+  draw();
+});
+
+resizeCanvas();
+
+</script>
+
+</body>
+</html>
