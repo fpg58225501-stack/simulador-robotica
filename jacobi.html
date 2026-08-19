@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jacobiano</title>
+
+  <style>
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:
+        radial-gradient(circle at top left,#113c71 0,#071a33 35%,#030b17 100%);
+      color:#fff;
+      min-height:100vh;
+    }
+
+    header{
+      padding:22px 28px 18px;
+      text-align:center;
+      background:rgba(0,0,0,.18);
+      border-bottom:3px solid #f6c344;
+      box-shadow:0 4px 18px rgba(0,0,0,.3);
+    }
+
+    header h1{
+      margin:0;
+      font-size:34px;
+      letter-spacing:.8px;
+    }
+
+    header p{
+      margin:8px 0 0;
+      color:#dce8f7;
+      font-size:15px;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns:360px 1fr 420px;
+      gap:18px;
+      padding:20px;
+      max-width:1600px;
+      margin:auto;
+    }
+
+    .card{
+      background:rgba(255,255,255,.96);
+      color:#122033;
+      border-radius:18px;
+      box-shadow:0 12px 30px rgba(0,0,0,.25);
+      padding:18px;
+      backdrop-filter:blur(8px);
+    }
+
+    .card h2{
+      margin:0 0 14px;
+      color:#083b75;
+      font-size:20px;
+      border-bottom:2px solid #e5eaf0;
+      padding-bottom:10px;
+    }
+
+    .control{
+      margin-bottom:14px;
+    }
+
+    .control label{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-weight:bold;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+
+    input[type="number"]{
+      width:100%;
+      border:1px solid #ccd6e0;
+      border-radius:10px;
+      padding:10px 12px;
+      font-size:15px;
+      outline:none;
+    }
+
+    input[type="number"]:focus{
+      border-color:#0c6cd9;
+      box-shadow:0 0 0 3px rgba(12,108,217,.12);
+    }
+
+    .buttons{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    button{
+      border:none;
+      border-radius:11px;
+      padding:11px 12px;
+      font-size:14px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+    }
+
+    .primary{
+      background:#0a67c7;
+      color:#fff;
+    }
+
+    .gold{
+      background:#f3c341;
+      color:#142033;
+    }
+
+    .dark{
+      background:#26394d;
+      color:#fff;
+    }
+
+    .danger{
+      background:#b52d3a;
+      color:#fff;
+    }
+
+    .small-note{
+      margin-top:14px;
+      padding:12px;
+      background:#eef5fb;
+      border-radius:11px;
+      color:#234;
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .canvasCard{
+      position:relative;
+      padding:0;
+      overflow:hidden;
+      min-height:680px;
+    }
+
+    canvas{
+      display:block;
+      width:100%;
+      height:680px;
+      background:
+        linear-gradient(#f8fbff,#eaf2f8);
+    }
+
+    .canvasOverlay{
+      position:absolute;
+      top:14px;
+      left:14px;
+      background:rgba(4,24,46,.85);
+      color:#fff;
+      border-radius:12px;
+      padding:10px 13px;
+      font-size:13px;
+      box-shadow:0 5px 18px rgba(0,0,0,.2);
+    }
+
+    .canvasOverlay strong{
+      color:#f6c344;
+    }
+
+    .resultBox{
+      background:#f5f8fb;
+      border-radius:13px;
+      padding:14px;
+      margin-bottom:13px;
+      border:1px solid #dfe7ee;
+    }
+
+    .resultBox h3{
+      margin:0 0 10px;
+      font-size:15px;
+      color:#083b75;
+    }
+
+    .matrix{
+      font-family:"Courier New",monospace;
+      font-size:17px;
+      line-height:1.55;
+      background:#fff;
+      border-radius:10px;
+      padding:10px 12px;
+      border:1px solid #d9e2ea;
+      overflow:auto;
+    }
+
+    .valueRow{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .metric{
+      background:#0c3d6f;
+      color:#fff;
+      border-radius:12px;
+      padding:14px;
+      text-align:center;
+    }
+
+    .metric .label{
+      font-size:12px;
+      opacity:.8;
+    }
+
+    .metric .value{
+      margin-top:5px;
+      font-size:24px;
+      font-weight:bold;
+      color:#f7c945;
+    }
+
+    .warning{
+      display:none;
+      background:#fff0d8;
+      color:#7a4d00;
+      border:1px solid #f3c341;
+      border-radius:12px;
+      padding:12px;
+      margin-top:12px;
+      font-weight:bold;
+      font-size:13px;
+    }
+
+    .footerText{
+      text-align:center;
+      color:#cbd7e5;
+      font-size:12px;
+      padding:0 0 20px;
+    }
+
+    @media(max-width:1200px){
+      .main{
+        grid-template-columns:320px 1fr;
+      }
+
+      .results{
+        grid-column:1/-1;
+      }
+    }
+
+    @media(max-width:800px){
+      .main{
+        grid-template-columns:1fr;
+      }
+
+      .results{
+        grid-column:auto;
+      }
+
+      canvas{
+        height:520px;
+      }
+
+      .canvasCard{
+        min-height:520px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Laboratório do Jacobiano</h1>
+  <p>Manipulador plano de 2 juntas • velocidades articulares • velocidade do efetuador</p>
+</header>
+
+<div class="main">
+
+  <div class="card">
+
+    <h2>Parâmetros do manipulador</h2>
+
+    <div class="control">
+      <label>
+        <span>Comprimento do elo 1 (m)</span>
+      </label>
+      <input id="L1" type="number" step="0.1" value="1">
+    </div>
+
+    <div class="control">
+      <label>
+        <span>Comprimento do elo 2 (m)</span>
+      </label>
+      <input id="L2" type="number" step="0.1" value="1">
+    </div>
+
+    <div class="control">
+      <label>
+        <span>Ângulo θ₁ (graus)</span>
+      </label>
+      <input id="theta1" type="number" step="1" value="0">
+    </div>
+
+    <div class="control">
+      <label>
+        <span>Ângulo θ₂ (graus)</span>
+      </label>
+      <input id="theta2" type="number" step="1" value="90">
+    </div>
+
+    <div class="control">
+      <label>
+        <span>Velocidade angular ω₁ (rad/s)</span>
+      </label>
+      <input id="omega1" type="number" step="0.05" value="0.2">
+    </div>
+
+    <div class="control">
+      <label>
+        <span>Velocidade angular ω₂ (rad/s)</span>
+      </label>
+      <input id="omega2" type="number" step="0.05" value="0.1">
+    </div>
+
+    <div class="buttons">
+      <button class="primary" id="calcBtn">Calcular</button>
+      <button class="gold" id="startBtn">Iniciar movimento</button>
+      <button class="dark" id="pauseBtn">Pausar</button>
+      <button class="danger" id="resetBtn">Reiniciar</button>
+    </div>
+
+    <div class="small-note">
+      Durante a animação, os ângulos mudam conforme as velocidades angulares informadas.
+      O Jacobiano e a velocidade do efetuador são atualizados em tempo real.
+    </div>
+
+  </div>
+
+  <div class="card canvasCard">
+
+    <canvas id="canvas"></canvas>
+
+    <div class="canvasOverlay">
+      <strong>Manipulador 2R</strong><br>
+      A seta na ponta indica a velocidade instantânea do efetuador.
+    </div>
+
+  </div>
+
+  <div class="card results">
+
+    <h2>Resultados</h2>
+
+    <div class="resultBox">
+      <h3>Matriz Jacobiana</h3>
+      <div class="matrix" id="jacobianOutput"></div>
+    </div>
+
+    <div class="resultBox">
+      <h3>Vetor de velocidades das juntas</h3>
+      <div class="matrix" id="jointVelocityOutput"></div>
+    </div>
+
+    <div class="resultBox">
+      <h3>Vetor velocidade do efetuador</h3>
+      <div class="matrix" id="velocityOutput"></div>
+    </div>
+
+    <div class="valueRow">
+      <div class="metric">
+        <div class="label">vx</div>
+        <div class="value" id="vxVal">0.00</div>
+      </div>
+
+      <div class="metric">
+        <div class="label">vy</div>
+        <div class="value" id="vyVal">0.00</div>
+      </div>
+    </div>
+
+    <div class="metric" style="margin-top:10px;">
+      <div class="label">Módulo da velocidade</div>
+      <div class="value" id="speedVal">0.00 m/s</div>
+    </div>
+
+    <div class="warning" id="warning">
+      Configuração próxima de uma singularidade.
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footerText">
+  Simulador didático de cinemática diferencial de manipuladores
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const L1Input = document.getElementById("L1");
+const L2Input = document.getElementById("L2");
+const theta1Input = document.getElementById("theta1");
+const theta2Input = document.getElementById("theta2");
+const omega1Input = document.getElementById("omega1");
+const omega2Input = document.getElementById("omega2");
+
+const jacobianOutput = document.getElementById("jacobianOutput");
+const jointVelocityOutput = document.getElementById("jointVelocityOutput");
+const velocityOutput = document.getElementById("velocityOutput");
+
+const vxVal = document.getElementById("vxVal");
+const vyVal = document.getElementById("vyVal");
+const speedVal = document.getElementById("speedVal");
+
+const warning = document.getElementById("warning");
+
+const calcBtn = document.getElementById("calcBtn");
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+let running = false;
+let lastTime = null;
+
+let trail = [];
+
+function degToRad(deg){
+  return deg * Math.PI / 180;
+}
+
+function radToDeg(rad){
+  return rad * 180 / Math.PI;
+}
+
+function getValues(){
+  return {
+    L1: parseFloat(L1Input.value),
+    L2: parseFloat(L2Input.value),
+    t1: degToRad(parseFloat(theta1Input.value)),
+    t2: degToRad(parseFloat(theta2Input.value)),
+    w1: parseFloat(omega1Input.value),
+    w2: parseFloat(omega2Input.value)
+  };
+}
+
+function calculate(){
+  const {L1,L2,t1,t2,w1,w2} = getValues();
+
+  const s1 = Math.sin(t1);
+  const c1 = Math.cos(t1);
+
+  const s12 = Math.sin(t1+t2);
+  const c12 = Math.cos(t1+t2);
+
+  const J11 = -L1*s1 - L2*s12;
+  const J12 = -L2*s12;
+
+  const J21 = L1*c1 + L2*c12;
+  const J22 = L2*c12;
+
+  const vx = J11*w1 + J12*w2;
+  const vy = J21*w1 + J22*w2;
+
+  const speed = Math.hypot(vx,vy);
+
+  const x1 = L1*c1;
+  const y1 = L1*s1;
+
+  const x2 = x1 + L2*c12;
+  const y2 = y1 + L2*s12;
+
+  const determinant = J11*J22 - J12*J21;
+
+  return {
+    L1,L2,t1,t2,w1,w2,
+    J11,J12,J21,J22,
+    vx,vy,speed,
+    x1,y1,x2,y2,
+    determinant
+  };
+}
+
+function format(n){
+  if(Math.abs(n) < 0.0005) n = 0;
+  return n.toFixed(3);
+}
+
+function updateResults(){
+  const r = calculate();
+
+  jacobianOutput.innerHTML =
+    `[ ${format(r.J11)} &nbsp;&nbsp; ${format(r.J12)} ]<br>` +
+    `[ ${format(r.J21)} &nbsp;&nbsp; ${format(r.J22)} ]`;
+
+  jointVelocityOutput.innerHTML =
+    `[ ${format(r.w1)} ]<br>` +
+    `[ ${format(r.w2)} ]`;
+
+  velocityOutput.innerHTML =
+    `[ ${format(r.vx)} ]<br>` +
+    `[ ${format(r.vy)} ]`;
+
+  vxVal.textContent = format(r.vx);
+  vyVal.textContent = format(r.vy);
+  speedVal.textContent = format(r.speed) + " m/s";
+
+  if(Math.abs(r.determinant) < 0.04){
+    warning.style.display = "block";
+  }else{
+    warning.style.display = "none";
+  }
+
+  draw();
+}
+
+function resizeCanvas(){
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+
+  ctx.setTransform(
+    devicePixelRatio,0,0,devicePixelRatio,0,0
+  );
+
+  draw();
+}
+
+window.addEventListener("resize",resizeCanvas);
+
+function drawBackground(){
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,"#f8fbff");
+  grad.addColorStop(1,"#e8f0f7");
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.strokeStyle = "rgba(10,45,80,.08)";
+  ctx.lineWidth = 1;
+
+  const spacing = 45;
+
+  for(let x=0;x<w;x+=spacing){
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,h);
+    ctx.stroke();
+  }
+
+  for(let y=0;y<h;y+=spacing){
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(w,y);
+    ctx.stroke();
+  }
+}
+
+function getScale(r){
+  const maxReach = r.L1 + r.L2;
+
+  return Math.min(
+    canvas.clientWidth * 0.32 / maxReach,
+    canvas.clientHeight * 0.32 / maxReach
+  );
+}
+
+function worldToScreen(x,y,scale){
+  return {
+    x: canvas.clientWidth * 0.46 + x*scale,
+    y: canvas.clientHeight * 0.67 - y*scale
+  };
+}
+
+function drawTrail(){
+  if(trail.length < 2) return;
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(94,53,177,.6)";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+
+  trail.forEach((p,i)=>{
+    if(i===0) ctx.moveTo(p.x,p.y);
+    else ctx.lineTo(p.x,p.y);
+  });
+
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawLink(a,b,width=24){
+  ctx.save();
+
+  ctx.lineCap="round";
+
+  ctx.strokeStyle="#0b2d4e";
+  ctx.lineWidth=width+8;
+  ctx.beginPath();
+  ctx.moveTo(a.x,a.y);
+  ctx.lineTo(b.x,b.y);
+  ctx.stroke();
+
+  const grad = ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+  grad.addColorStop(0,"#dce7f0");
+  grad.addColorStop(.5,"#ffffff");
+  grad.addColorStop(1,"#a9bac9");
+
+  ctx.strokeStyle=grad;
+  ctx.lineWidth=width;
+  ctx.beginPath();
+  ctx.moveTo(a.x,a.y);
+  ctx.lineTo(b.x,b.y);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawJoint(p,radius=19){
+  ctx.save();
+
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,radius+4,0,Math.PI*2);
+  ctx.fillStyle="#0b2d4e";
+  ctx.fill();
+
+  const g=ctx.createRadialGradient(
+    p.x-5,p.y-5,2,
+    p.x,p.y,radius
+  );
+
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.5,"#d9e1e7");
+  g.addColorStop(1,"#728391");
+
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,radius,0,Math.PI*2);
+  ctx.fillStyle=g;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,7,0,Math.PI*2);
+  ctx.fillStyle="#f3c341";
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawBase(p){
+  ctx.save();
+
+  const grad=ctx.createLinearGradient(
+    p.x-45,p.y,
+    p.x+45,p.y
+  );
+
+  grad.addColorStop(0,"#1a2f43");
+  grad.addColorStop(.5,"#50697c");
+  grad.addColorStop(1,"#102131");
+
+  ctx.fillStyle=grad;
+  ctx.fillRect(p.x-45,p.y+8,90,34);
+
+  ctx.beginPath();
+  ctx.ellipse(p.x,p.y+8,45,14,0,0,Math.PI*2);
+  ctx.fillStyle="#30495d";
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawVelocityArrow(p,vx,vy,scale){
+  const mag = Math.hypot(vx,vy);
+  if(mag<0.0001) return;
+
+  const factor=90/(mag+0.0001);
+
+  const ex=p.x+vx*factor;
+  const ey=p.y-vy*factor;
+
+  ctx.save();
+
+  ctx.strokeStyle="#d7263d";
+  ctx.fillStyle="#d7263d";
+  ctx.lineWidth=5;
+
+  ctx.beginPath();
+  ctx.moveTo(p.x,p.y);
+  ctx.lineTo(ex,ey);
+  ctx.stroke();
+
+  const angle=Math.atan2(ey-p.y,ex-p.x);
+
+  ctx.beginPath();
+  ctx.moveTo(ex,ey);
+  ctx.lineTo(
+    ex-14*Math.cos(angle-.45),
+    ey-14*Math.sin(angle-.45)
+  );
+  ctx.lineTo(
+    ex-14*Math.cos(angle+.45),
+    ey-14*Math.sin(angle+.45)
+  );
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.font="bold 14px Arial";
+  ctx.fillText("v",ex+8,ey-6);
+
+  ctx.restore();
+}
+
+function drawAxes(base){
+  ctx.save();
+
+  ctx.lineWidth=3;
+
+  ctx.strokeStyle="#c62828";
+  ctx.beginPath();
+  ctx.moveTo(base.x,base.y);
+  ctx.lineTo(base.x+70,base.y);
+  ctx.stroke();
+
+  ctx.fillStyle="#c62828";
+  ctx.font="bold 14px Arial";
+  ctx.fillText("X",base.x+78,base.y+5);
+
+  ctx.strokeStyle="#218838";
+  ctx.beginPath();
+  ctx.moveTo(base.x,base.y);
+  ctx.lineTo(base.x,base.y-70);
+  ctx.stroke();
+
+  ctx.fillStyle="#218838";
+  ctx.fillText("Y",base.x-5,base.y-80);
+
+  ctx.restore();
+}
+
+function drawLabels(base,j1,j2){
+  ctx.save();
+  ctx.font="bold 13px Arial";
+  ctx.fillStyle="#123";
+
+  ctx.fillText("Base",base.x-18,base.y+62);
+  ctx.fillText("J1",j1.x-10,j1.y-28);
+  ctx.fillText("J2",j2.x-10,j2.y-28);
+
+  ctx.restore();
+}
+
+function draw(){
+  const r=calculate();
+  const scale=getScale(r);
+
+  drawBackground();
+
+  const base=worldToScreen(0,0,scale);
+  const p1=worldToScreen(r.x1,r.y1,scale);
+  const p2=worldToScreen(r.x2,r.y2,scale);
+
+  drawTrail();
+  drawAxes(base);
+  drawBase(base);
+
+  drawLink(base,p1);
+  drawLink(p1,p2);
+
+  drawJoint(base,21);
+  drawJoint(p1,19);
+  drawJoint(p2,16);
+
+  drawVelocityArrow(
+    p2,
+    r.vx,
+    r.vy,
+    scale
+  );
+
+  drawLabels(base,p1,p2);
+}
+
+function animate(timestamp){
+  if(!running){
+    lastTime=null;
+    return;
+  }
+
+  if(lastTime===null) lastTime=timestamp;
+
+  const dt=(timestamp-lastTime)/1000;
+  lastTime=timestamp;
+
+  const w1=parseFloat(omega1Input.value);
+  const w2=parseFloat(omega2Input.value);
+
+  let t1=degToRad(parseFloat(theta1Input.value));
+  let t2=degToRad(parseFloat(theta2Input.value));
+
+  t1 += w1*dt;
+  t2 += w2*dt;
+
+  theta1Input.value = radToDeg(t1).toFixed(2);
+  theta2Input.value = radToDeg(t2).toFixed(2);
+
+  const r=calculate();
+  const scale=getScale(r);
+  const p2=worldToScreen(r.x2,r.y2,scale);
+
+  trail.push({x:p2.x,y:p2.y});
+
+  if(trail.length>350){
+    trail.shift();
+  }
+
+  updateResults();
+
+  requestAnimationFrame(animate);
+}
+
+calcBtn.onclick=()=>{
+  updateResults();
+};
+
+startBtn.onclick=()=>{
+  if(running) return;
+
+  running=true;
+  lastTime=null;
+  requestAnimationFrame(animate);
+};
+
+pauseBtn.onclick=()=>{
+  running=false;
+};
+
+resetBtn.onclick=()=>{
+  running=false;
+
+  L1Input.value=1;
+  L2Input.value=1;
+
+  theta1Input.value=0;
+  theta2Input.value=90;
+
+  omega1Input.value=.2;
+  omega2Input.value=.1;
+
+  trail=[];
+
+  updateResults();
+};
+
+[
+  L1Input,
+  L2Input,
+  theta1Input,
+  theta2Input,
+  omega1Input,
+  omega2Input
+].forEach(el=>{
+  el.addEventListener("input",()=>{
+    if(!running){
+      updateResults();
+    }
+  });
+});
+
+resizeCanvas();
+updateResults();
+</script>
+
+</body>
+</html>
