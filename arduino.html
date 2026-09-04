@@ -4,412 +4,416 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Laboratório Jacobiana + Arduino</title>
+<title>Laboratório de Robótica - Jacobiana e Arduino</title>
 
 <style>
-
 *{
-  box-sizing:border-box;
+    box-sizing:border-box;
 }
 
 body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#071a33;
-  color:white;
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#071a33;
+    color:white;
 }
 
 header{
-  background:#082b52;
-  border-bottom:4px solid #f2c23e;
-  padding:18px;
-  text-align:center;
+    padding:18px 20px;
+    text-align:center;
+    background:#082b52;
+    border-bottom:4px solid #f3c542;
 }
 
 header h1{
-  margin:0;
-  font-size:29px;
+    margin:0;
+    font-size:30px;
 }
 
 header p{
-  margin:7px 0 0;
-  color:#dce8f3;
+    margin:7px 0 0;
+    color:#dce8f5;
 }
 
-/* =========================
+/* ======================
    DADOS DO PROBLEMA
-========================= */
+====================== */
 
-.problem{
-  max-width:1500px;
-  margin:18px auto;
-  padding:0 18px;
+.problem-area{
+    max-width:1500px;
+    margin:18px auto;
+    padding:0 18px;
 }
 
 .problem-grid{
-  background:white;
-  border-radius:15px;
-  padding:14px;
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:10px;
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:10px;
+    background:white;
+    padding:14px;
+    border-radius:16px;
 }
 
-.datum{
-  background:#edf4fa;
-  border:1px solid #d1e0ec;
-  border-radius:10px;
-  padding:10px;
-  text-align:center;
-  color:#14314d;
+.data-box{
+    background:#edf4fa;
+    border:1px solid #d3e1ec;
+    border-radius:11px;
+    padding:10px;
+    text-align:center;
+    color:#17324c;
 }
 
-.datum small{
-  display:block;
-  color:#617489;
-  margin-bottom:4px;
+.data-box small{
+    display:block;
+    color:#617588;
+    margin-bottom:4px;
 }
 
-.datum strong{
-  color:#073e78;
-  font-size:20px;
+.data-box strong{
+    color:#073e78;
+    font-size:20px;
 }
 
-.new-btn{
-  width:100%;
-  margin-top:10px;
-  border:0;
-  background:#f2c23e;
-  color:#172033;
-  font-weight:bold;
-  padding:11px;
-  border-radius:9px;
-  cursor:pointer;
+.new-problem{
+    width:100%;
+    margin-top:10px;
+    border:0;
+    border-radius:10px;
+    padding:12px;
+    background:#f3c542;
+    color:#192433;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-/* =========================
-   ÁREA PRINCIPAL
-========================= */
+/* ======================
+   LAYOUT
+====================== */
 
 .main{
-  max-width:1500px;
-  margin:auto;
-  padding:0 18px 25px;
-  display:grid;
-  grid-template-columns:1.05fr .95fr;
-  gap:18px;
+    max-width:1500px;
+    margin:auto;
+    padding:0 18px 25px;
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:18px;
 }
 
 .card{
-  background:white;
-  color:#17263a;
-  border-radius:16px;
-  overflow:hidden;
-  box-shadow:0 10px 28px rgba(0,0,0,.28);
+    background:white;
+    color:#17283b;
+    border-radius:17px;
+    overflow:hidden;
+    box-shadow:0 12px 30px rgba(0,0,0,.27);
 }
 
 .card-title{
-  background:#0a3e72;
-  color:white;
-  padding:13px 16px;
-  font-weight:bold;
+    padding:13px 16px;
+    background:#0a3e72;
+    color:white;
+    font-weight:bold;
 }
 
-/* =========================
-   MANIPULADOR
-========================= */
+/* ======================
+   ROBÔ
+====================== */
 
 .robot-area{
-  position:relative;
+    position:relative;
 }
 
 canvas{
-  display:block;
-  width:100%;
-  height:650px;
+    display:block;
+    width:100%;
+    height:650px;
 }
 
 .robot-status{
-  position:absolute;
-  top:14px;
-  left:14px;
-  background:rgba(5,27,49,.90);
-  color:white;
-  padding:10px 13px;
-  border-radius:9px;
-  font-size:13px;
-  max-width:300px;
+    position:absolute;
+    top:14px;
+    left:14px;
+    max-width:300px;
+
+    background:rgba(5,28,51,.90);
+    color:white;
+
+    padding:10px 13px;
+    border-radius:10px;
+    font-size:13px;
 }
 
 .robot-status strong{
-  color:#f2c23e;
+    color:#f3c542;
 }
 
-.indicators{
-  position:absolute;
-  left:14px;
-  bottom:14px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:7px;
-  width:280px;
+.robot-info{
+    position:absolute;
+    left:14px;
+    bottom:14px;
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+
+    width:300px;
 }
 
-.indicator{
-  background:rgba(255,255,255,.94);
-  border:1px solid #d7e1e9;
-  color:#183047;
-  border-radius:8px;
-  padding:8px 10px;
-  font-size:12px;
+.info-box{
+    background:rgba(255,255,255,.94);
+    border:1px solid #d8e3ec;
+
+    padding:8px 10px;
+    border-radius:8px;
+
+    color:#24384c;
+    font-size:12px;
 }
 
-.indicator b{
-  color:#073e78;
+.info-box b{
+    color:#073e78;
 }
 
-/* =========================
+/* ======================
    EDITOR
-========================= */
+====================== */
 
 .editor{
-  padding:16px;
+    padding:16px;
 }
 
 .editor-label{
-  color:#0a3e72;
-  font-weight:bold;
-  margin-bottom:9px;
+    font-weight:bold;
+    color:#073e78;
+    margin-bottom:9px;
 }
 
 textarea{
-  width:100%;
-  min-height:300px;
-  resize:vertical;
-  border:0;
-  outline:none;
-  background:#111827;
-  color:#d9f7ff;
-  padding:16px;
-  border-radius:11px;
-  font-family:Consolas,"Courier New",monospace;
-  font-size:15px;
-  line-height:1.5;
+    width:100%;
+    min-height:300px;
+
+    border:0;
+    outline:0;
+    resize:vertical;
+
+    background:#111827;
+    color:#d9f7ff;
+
+    padding:16px;
+    border-radius:11px;
+
+    font-family:Consolas,"Courier New",monospace;
+    font-size:15px;
+    line-height:1.5;
 }
 
 .actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-  margin-top:11px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:10px;
 }
 
 button{
-  border:0;
-  border-radius:9px;
-  padding:11px;
-  font-weight:bold;
-  cursor:pointer;
+    border:0;
+    border-radius:9px;
+    padding:11px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
 .run{
-  background:#0870d1;
-  color:white;
+    background:#0870d1;
+    color:white;
 }
 
 .reset{
-  background:#34495e;
-  color:white;
+    background:#34495e;
+    color:white;
 }
 
-/* =========================
+/* ======================
    CONSOLE
-========================= */
+====================== */
 
 .console{
-  background:#07111f;
-  color:#bdfaca;
-  min-height:120px;
-  margin-top:13px;
-  padding:12px;
-  border-radius:10px;
-  font-family:Consolas,monospace;
-  white-space:pre-wrap;
+    background:#07111f;
+    color:#bdfaca;
+
+    margin-top:13px;
+    padding:12px;
+
+    min-height:125px;
+
+    border-radius:10px;
+
+    font-family:Consolas,monospace;
+    white-space:pre-wrap;
 }
 
-/* =========================
+/* ======================
    RESULTADOS
-========================= */
+====================== */
 
 .results{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-  margin-top:12px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    margin-top:12px;
 }
 
 .result{
-  background:#eef5fb;
-  border-radius:9px;
-  padding:9px;
-  border:1px solid #d9e5ee;
+    background:#eef5fb;
+    border:1px solid #d8e4ed;
+    border-radius:9px;
+    padding:9px;
 }
 
 .result small{
-  color:#607488;
-  display:block;
+    display:block;
+    color:#627588;
 }
 
 .result strong{
-  color:#073e78;
-  display:block;
-  margin-top:4px;
+    display:block;
+    color:#073e78;
+    margin-top:4px;
 }
 
-/* =========================
-   ESCOLHA DA CARGA
-========================= */
+/* ======================
+   PESOS
+====================== */
 
 .weight-panel{
-  display:none;
-  margin-top:14px;
-  background:#f6f8fb;
-  border:1px solid #d8e3ec;
-  border-radius:11px;
-  padding:13px;
+    display:none;
+
+    margin-top:14px;
+    padding:13px;
+
+    background:#f5f8fb;
+    border:1px solid #d6e2ec;
+    border-radius:11px;
 }
 
 .weight-panel h3{
-  margin:0 0 5px;
-  color:#073e78;
+    color:#073e78;
+    margin:0 0 5px;
 }
 
 .weight-panel p{
-  font-size:13px;
-  margin:4px 0 11px;
-  color:#586a7b;
+    margin:4px 0 12px;
+    color:#596d80;
+    font-size:13px;
 }
 
-.weights{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:7px;
+.weight-buttons{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:7px;
 }
 
 .weight-btn{
-  background:#e7eef5;
-  color:#18334d;
-  border:1px solid #cad8e4;
-}
-
-.weight-btn:hover{
-  background:#d4e5f3;
+    background:#e7eef5;
+    border:1px solid #ccd9e4;
+    color:#17324a;
 }
 
 .message{
-  display:none;
-  margin-top:12px;
-  padding:13px;
-  border-radius:10px;
-  text-align:center;
-  font-weight:bold;
+    display:none;
+
+    margin-top:12px;
+    padding:13px;
+
+    border-radius:10px;
+    text-align:center;
+    font-weight:bold;
 }
 
-.ok{
-  background:#e3f6e8;
-  color:#12612f;
-  border:1px solid #81c995;
+.success{
+    background:#e5f7ea;
+    color:#126132;
+    border:1px solid #82cb97;
 }
 
 .error{
-  background:#ffe7e7;
-  color:#a01818;
-  border:1px solid #e49494;
-  font-size:17px;
+    background:#ffe7e7;
+    color:#a01717;
+    border:1px solid #e68f8f;
+    font-size:17px;
 }
-
-/* =========================
-   RESPONSIVO
-========================= */
 
 @media(max-width:1050px){
 
-  .main{
-    grid-template-columns:1fr;
-  }
+    .main{
+        grid-template-columns:1fr;
+    }
 
-  .problem-grid{
-    grid-template-columns:repeat(3,1fr);
-  }
-
+    .problem-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
 }
 
 @media(max-width:600px){
 
-  .problem-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
+    .problem-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
 
-  canvas{
-    height:500px;
-  }
+    .weight-buttons{
+        grid-template-columns:repeat(2,1fr);
+    }
 
-  .weights{
-    grid-template-columns:repeat(2,1fr);
-  }
-
+    canvas{
+        height:520px;
+    }
 }
-
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>Laboratório de Robótica — Jacobiana + Arduino</h1>
-<p>Calcule, programe, escolha a carga e teste o manipulador.</p>
+    <h1>Laboratório de Robótica — Jacobiana + Arduino</h1>
+    <p>Calcule a Jacobiana, programe o manipulador e escolha a carga correta.</p>
 </header>
 
 
-<!-- DADOS -->
-
-<section class="problem">
+<section class="problem-area">
 
 <div class="problem-grid">
 
-<div class="datum">
-<small>L₁</small>
-<strong id="L1view"></strong>
+    <div class="data-box">
+        <small>L₁</small>
+        <strong id="L1view"></strong>
+    </div>
+
+    <div class="data-box">
+        <small>L₂</small>
+        <strong id="L2view"></strong>
+    </div>
+
+    <div class="data-box">
+        <small>θ₁</small>
+        <strong id="T1view"></strong>
+    </div>
+
+    <div class="data-box">
+        <small>θ₂</small>
+        <strong id="T2view"></strong>
+    </div>
+
+    <div class="data-box">
+        <small>Torque máximo J1</small>
+        <strong id="TM1view"></strong>
+    </div>
+
+    <div class="data-box">
+        <small>Torque máximo J2</small>
+        <strong id="TM2view"></strong>
+    </div>
+
 </div>
 
-<div class="datum">
-<small>L₂</small>
-<strong id="L2view"></strong>
-</div>
-
-<div class="datum">
-<small>θ₁</small>
-<strong id="T1view"></strong>
-</div>
-
-<div class="datum">
-<small>θ₂</small>
-<strong id="T2view"></strong>
-</div>
-
-<div class="datum">
-<small>Torque máx. motor 1</small>
-<strong id="TM1view"></strong>
-</div>
-
-<div class="datum">
-<small>Torque máx. motor 2</small>
-<strong id="TM2view"></strong>
-</div>
-
-</div>
-
-<button class="new-btn" id="newProblem">
+<button class="new-problem" id="newProblem">
 NOVO PROBLEMA
 </button>
 
@@ -418,12 +422,15 @@ NOVO PROBLEMA
 
 <div class="main">
 
-<!-- MANIPULADOR -->
+
+<!-- ===========================
+     MANIPULADOR
+=========================== -->
 
 <section class="card">
 
 <div class="card-title">
-Manipulador
+Manipulador robótico
 </div>
 
 <div class="robot-area">
@@ -431,30 +438,30 @@ Manipulador
 <canvas id="canvas"></canvas>
 
 <div class="robot-status" id="robotStatus">
-<strong>Estado:</strong> aguardando programação.
+<strong>Estado:</strong> manipulador em repouso.
 </div>
 
-<div class="indicators">
+<div class="robot-info">
 
-<div class="indicator">
-Velocidade:
-<b id="speedIndicator">—</b>
-</div>
+    <div class="info-box">
+        Velocidade:
+        <b id="speedIndicator">—</b>
+    </div>
 
-<div class="indicator">
-Carga:
-<b id="loadIndicator">—</b>
-</div>
+    <div class="info-box">
+        Carga:
+        <b id="loadIndicator">—</b>
+    </div>
 
-<div class="indicator">
-Torque J1:
-<b id="tau1Indicator">—</b>
-</div>
+    <div class="info-box">
+        Torque J1:
+        <b id="tau1Indicator">—</b>
+    </div>
 
-<div class="indicator">
-Torque J2:
-<b id="tau2Indicator">—</b>
-</div>
+    <div class="info-box">
+        Torque J2:
+        <b id="tau2Indicator">—</b>
+    </div>
 
 </div>
 
@@ -463,7 +470,9 @@ Torque J2:
 </section>
 
 
-<!-- ARDUINO -->
+<!-- ===========================
+     PROGRAMAÇÃO
+=========================== -->
 
 <section class="card">
 
@@ -474,11 +483,10 @@ Arduino / C++ didático
 <div class="editor">
 
 <div class="editor-label">
-Digite a Jacobiana calculada à mão
+Digite a Jacobiana calculada à mão:
 </div>
 
-<textarea id="code">
-void setup() {
+<textarea id="code">void setup() {
 
   J11 = 0.0000;
   J12 = 0.0000;
@@ -495,6 +503,7 @@ void loop() {
 }
 </textarea>
 
+
 <div class="actions">
 
 <button class="run" id="run">
@@ -507,10 +516,11 @@ REINICIAR
 
 </div>
 
+
 <div class="console" id="console">
 Arduino virtual pronto.
 
-Calcule a Jacobiana e digite no código.
+Calcule a Jacobiana à mão e depois digite os valores.
 </div>
 
 
@@ -537,7 +547,7 @@ Calcule a Jacobiana e digite no código.
 </div>
 
 <div class="result">
-<small>Força da carga</small>
+<small>Força peso</small>
 <strong id="force">—</strong>
 </div>
 
@@ -554,1792 +564,2414 @@ Calcule a Jacobiana e digite no código.
 <h3>Escolha a carga</h3>
 
 <p>
-Considere os limites de torque dos dois motores e escolha uma massa que o manipulador consiga levantar.
+Escolha uma carga compatível com os limites de torque dos motores.
 </p>
 
-<div class="weights" id="weights"></div>
+<div class="weight-buttons" id="weightButtons"></div>
 
 </div>
 
 
-<div class="message ok" id="success">
-Carga compatível. Manipulador executando a tarefa.
+<div class="message success" id="success">
+Carga correta.
 </div>
 
 <div class="message error" id="failure">
-SOBRECARGA — MANIPULADOR DESMONTADO
+ERRO
 </div>
 
 </div>
+
 </section>
 
 </div>
 
 
+
 <script>
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
+const canvas =
+document.getElementById("canvas");
 
-const code=document.getElementById("code");
-const consoleEl=document.getElementById("console");
-
-const weightPanel=document.getElementById("weightPanel");
-const weights=document.getElementById("weights");
-
-const success=document.getElementById("success");
-const failure=document.getElementById("failure");
-
-const robotStatus=document.getElementById("robotStatus");
-
-const vxOut=document.getElementById("vx");
-const vyOut=document.getElementById("vy");
-const w1Out=document.getElementById("w1");
-const w2Out=document.getElementById("w2");
-const forceOut=document.getElementById("force");
-const torqueOut=document.getElementById("torque");
-
-const speedIndicator=document.getElementById("speedIndicator");
-const loadIndicator=document.getElementById("loadIndicator");
-const tau1Indicator=document.getElementById("tau1Indicator");
-const tau2Indicator=document.getElementById("tau2Indicator");
-
-const L1view=document.getElementById("L1view");
-const L2view=document.getElementById("L2view");
-const T1view=document.getElementById("T1view");
-const T2view=document.getElementById("T2view");
-const TM1view=document.getElementById("TM1view");
-const TM2view=document.getElementById("TM2view");
-
-const G=9.81;
+const ctx =
+canvas.getContext("2d");
 
 
-/* =========================
+const code =
+document.getElementById("code");
+
+const consoleEl =
+document.getElementById("console");
+
+
+const robotStatus =
+document.getElementById("robotStatus");
+
+
+const weightPanel =
+document.getElementById("weightPanel");
+
+const weightButtons =
+document.getElementById("weightButtons");
+
+
+const success =
+document.getElementById("success");
+
+const failure =
+document.getElementById("failure");
+
+
+const vxOut =
+document.getElementById("vx");
+
+const vyOut =
+document.getElementById("vy");
+
+const w1Out =
+document.getElementById("w1");
+
+const w2Out =
+document.getElementById("w2");
+
+const forceOut =
+document.getElementById("force");
+
+const torqueOut =
+document.getElementById("torque");
+
+
+const speedIndicator =
+document.getElementById("speedIndicator");
+
+const loadIndicator =
+document.getElementById("loadIndicator");
+
+const tau1Indicator =
+document.getElementById("tau1Indicator");
+
+const tau2Indicator =
+document.getElementById("tau2Indicator");
+
+
+const L1view =
+document.getElementById("L1view");
+
+const L2view =
+document.getElementById("L2view");
+
+const T1view =
+document.getElementById("T1view");
+
+const T2view =
+document.getElementById("T2view");
+
+const TM1view =
+document.getElementById("TM1view");
+
+const TM2view =
+document.getElementById("TM2view");
+
+
+const G = 9.81;
+
+
+/* ======================================
    PROBLEMA
-========================= */
+====================================== */
 
-let problem={
-  L1:1.20,
-  L2:0.80,
-  t1:45,
-  t2:30,
+let problem = {
 
-  torqueMax1:18,
-  torqueMax2:9
+    L1:1.20,
+    L2:0.80,
+
+    t1:45,
+    t2:30,
+
+    torqueMax1:18,
+    torqueMax2:9
+
 };
 
 
-/* =========================
+/* ======================================
    ESTADO VISUAL
-========================= */
+====================================== */
 
-let visual={
-  t1:70,
-  t2:-60,
-  broken:false,
-  holding:false,
-  selectedMass:0
+let visual = {
+
+    t1:0,
+    t2:0,
+
+    broken:false,
+    holding:false,
+
+    selectedMass:0
+
 };
 
-let animation=null;
-let audioCtx=null;
+let currentProgram = null;
+
+let animation = null;
+
+let audioCtx = null;
 
 
-/* =========================
+/* ======================================
    MATEMÁTICA
-========================= */
+====================================== */
 
-function rad(d){
-  return d*Math.PI/180;
+function rad(degrees){
+
+    return degrees *
+    Math.PI / 180;
+
 }
 
 
 function trueJacobian(){
 
-  const a=rad(problem.t1);
-  const b=rad(problem.t2);
+    const t1 =
+    rad(problem.t1);
 
-  return{
+    const t2 =
+    rad(problem.t2);
 
-    J11:
-    -problem.L1*Math.sin(a)
-    -problem.L2*Math.sin(a+b),
 
-    J12:
-    -problem.L2*Math.sin(a+b),
+    return {
 
-    J21:
-    problem.L1*Math.cos(a)
-    +problem.L2*Math.cos(a+b),
+        J11:
+        -problem.L1*Math.sin(t1)
+        -problem.L2*Math.sin(t1+t2),
 
-    J22:
-    problem.L2*Math.cos(a+b)
+        J12:
+        -problem.L2*Math.sin(t1+t2),
 
-  };
+        J21:
+        problem.L1*Math.cos(t1)
+        +problem.L2*Math.cos(t1+t2),
+
+        J22:
+        problem.L2*Math.cos(t1+t2)
+
+    };
 
 }
 
+
+/* ======================================
+   CINEMÁTICA
+====================================== */
 
 function pose(theta1,theta2){
 
-  const a=rad(theta1);
-  const b=rad(theta2);
+    const t1 =
+    rad(theta1);
 
-  const x1=
-  problem.L1*Math.cos(a);
+    const t2 =
+    rad(theta2);
 
-  const y1=
-  problem.L1*Math.sin(a);
 
-  const x2=
-  x1+
-  problem.L2*Math.cos(a+b);
+    const x1 =
+    problem.L1 *
+    Math.cos(t1);
 
-  const y2=
-  y1+
-  problem.L2*Math.sin(a+b);
+    const y1 =
+    problem.L1 *
+    Math.sin(t1);
 
-  return{x1,y1,x2,y2};
+
+    const x2 =
+    x1 +
+    problem.L2 *
+    Math.cos(t1+t2);
+
+    const y2 =
+    y1 +
+    problem.L2 *
+    Math.sin(t1+t2);
+
+
+    return {
+
+        x1,
+        y1,
+        x2,
+        y2
+
+    };
 
 }
 
 
-/* =========================
-   LEITURA C++
-========================= */
+/* ======================================
+   PROCURA UMA POSE MAIS ALTA
+====================================== */
 
-function getVar(name){
+function findHigherPose(){
 
-  const regex=
-  new RegExp(
-    name+"\\s*=\\s*(-?\\d+(?:[\\.,]\\d+)?)\\s*;"
-  );
+    const target =
+    pose(problem.t1,problem.t2);
 
-  const match=
-  code.value.match(regex);
+    let best = {
+        t1:problem.t1,
+        t2:problem.t2,
+        y:target.y2
+    };
 
-  if(!match){
-    return NaN;
-  }
 
-  return parseFloat(
-    match[1].replace(",",".")
-  );
+    for(
+        let a = problem.t1-45;
+        a <= problem.t1+45;
+        a += 5
+    ){
+
+        for(
+            let b = problem.t2-45;
+            b <= problem.t2+45;
+            b += 5
+        ){
+
+            if(
+                a < -150 ||
+                a > 150 ||
+                b < -150 ||
+                b > 150
+            ){
+                continue;
+            }
+
+
+            const p =
+            pose(a,b);
+
+
+            if(p.y2 > best.y){
+
+                best = {
+
+                    t1:a,
+                    t2:b,
+                    y:p.y2
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    return best;
+
+}
+
+
+/* ======================================
+   POSE DE REPOUSO
+====================================== */
+
+function restPose(){
+
+    const high =
+    findHigherPose();
+
+
+    return {
+
+        t1:high.t1,
+        t2:high.t2
+
+    };
+
+}
+
+
+/* ======================================
+   LER CÓDIGO
+====================================== */
+
+function getVariable(name){
+
+    const expression =
+    new RegExp(
+        name+
+        "\\s*=\\s*(-?\\d+(?:[\\.,]\\d+)?)\\s*;"
+    );
+
+
+    const match =
+    code.value.match(expression);
+
+
+    if(!match){
+        return NaN;
+    }
+
+
+    return parseFloat(
+        match[1]
+        .replace(",",".")
+    );
 
 }
 
 
 function readCode(){
 
-  return{
+    return {
 
-    J11:getVar("J11"),
-    J12:getVar("J12"),
-    J21:getVar("J21"),
-    J22:getVar("J22"),
+        J11:getVariable("J11"),
+        J12:getVariable("J12"),
+        J21:getVariable("J21"),
+        J22:getVariable("J22"),
 
-    w1:getVar("omega1"),
-    w2:getVar("omega2")
+        w1:getVariable("omega1"),
+        w2:getVariable("omega2")
 
-  };
+    };
 
 }
 
+
+/* ======================================
+   VALIDAR JACOBIANA
+====================================== */
 
 function closeEnough(a,b){
 
-  return (
-    Number.isFinite(a) &&
-    Math.abs(a-b)<0.025
-  );
+    return (
+        Number.isFinite(a) &&
+        Math.abs(a-b) <= 0.025
+    );
 
 }
 
 
-function validJacobian(data){
+function validateJacobian(data){
 
-  const j=trueJacobian();
+    const j =
+    trueJacobian();
 
-  return(
 
-    closeEnough(data.J11,j.J11) &&
-    closeEnough(data.J12,j.J12) &&
-    closeEnough(data.J21,j.J21) &&
-    closeEnough(data.J22,j.J22)
+    return (
 
-  );
+        closeEnough(data.J11,j.J11) &&
+        closeEnough(data.J12,j.J12) &&
+        closeEnough(data.J21,j.J21) &&
+        closeEnough(data.J22,j.J22)
+
+    );
 
 }
 
 
-/* =========================
-   VELOCIDADES
-========================= */
+/* ======================================
+   VELOCIDADE
+====================================== */
 
 function velocity(data){
 
-  return{
+    return {
 
-    vx:
-    data.J11*data.w1+
-    data.J12*data.w2,
+        vx:
+        data.J11*data.w1 +
+        data.J12*data.w2,
 
-    vy:
-    data.J21*data.w1+
-    data.J22*data.w2
+        vy:
+        data.J21*data.w1 +
+        data.J22*data.w2
 
-  };
+    };
 
 }
 
 
-/* =========================
-   TORQUE PARA UMA MASSA
-========================= */
+/* ======================================
+   TORQUES
+====================================== */
 
 function loadTorque(mass){
 
-  const j=trueJacobian();
+    /*
+       Força peso:
 
-  const Fy=
-  -mass*G;
+       Fx = 0
+       Fy = -mg
 
-  /*
-      F = [0 , -mg]
+       τ = Jᵀ F
+    */
 
-      τ = Jᵀ F
-  */
-
-  const tau1=
-  j.J21*Fy;
-
-  const tau2=
-  j.J22*Fy;
-
-  return{
-
-    force:mass*G,
-    tau1,
-    tau2
-
-  };
-
-}
+    const j =
+    currentProgram ||
+    trueJacobian();
 
 
-function loadIsSafe(mass){
+    const Fy =
+    -mass*G;
 
-  const t=
-  loadTorque(mass);
 
-  return(
+    return {
 
-    Math.abs(t.tau1)<=
-    problem.torqueMax1
+        force:
+        mass*G,
 
-    &&
+        tau1:
+        j.J21*Fy,
 
-    Math.abs(t.tau2)<=
-    problem.torqueMax2
+        tau2:
+        j.J22*Fy
 
-  );
+    };
 
 }
 
 
-/* =========================
-   ESCALA / CANVAS
-========================= */
+/* ======================================
+   MASSA MÁXIMA
+====================================== */
+
+function maximumMass(){
+
+    const j =
+    trueJacobian();
+
+
+    let limit1 =
+    Infinity;
+
+    let limit2 =
+    Infinity;
+
+
+    if(
+        Math.abs(j.J21) >
+        0.00001
+    ){
+
+        limit1 =
+        problem.torqueMax1 /
+        (
+            G *
+            Math.abs(j.J21)
+        );
+
+    }
+
+
+    if(
+        Math.abs(j.J22) >
+        0.00001
+    ){
+
+        limit2 =
+        problem.torqueMax2 /
+        (
+            G *
+            Math.abs(j.J22)
+        );
+
+    }
+
+
+    return Math.min(
+        limit1,
+        limit2
+    );
+
+}
+
+
+/* ======================================
+   OPÇÕES DE MASSA
+====================================== */
+
+function makeMassOptions(){
+
+    const max =
+    maximumMass();
+
+
+    let safe =
+    Math.floor(
+        max*2
+    ) / 2;
+
+
+    safe =
+    Math.max(
+        .5,
+        safe
+    );
+
+
+    if(safe >= max){
+
+        safe =
+        Math.max(
+            .5,
+            safe-.5
+        );
+
+    }
+
+
+    return [
+
+        safe,
+
+        Math.ceil(
+            max*1.15*2
+        )/2,
+
+        Math.ceil(
+            max*1.35*2
+        )/2,
+
+        Math.ceil(
+            max*1.60*2
+        )/2
+
+    ]
+    .filter(
+        (v,i,a)=>
+        a.indexOf(v)===i
+    );
+
+}
+
+
+/* ======================================
+   CANVAS
+====================================== */
 
 function resize(){
 
-  const rect=
-  canvas.getBoundingClientRect();
+    const rect =
+    canvas.getBoundingClientRect();
 
-  canvas.width=
-  rect.width*devicePixelRatio;
 
-  canvas.height=
-  rect.height*devicePixelRatio;
+    canvas.width =
+    rect.width *
+    devicePixelRatio;
 
-  ctx.setTransform(
-    devicePixelRatio,
-    0,
-    0,
-    devicePixelRatio,
-    0,
-    0
-  );
+    canvas.height =
+    rect.height *
+    devicePixelRatio;
 
-  draw();
+
+    ctx.setTransform(
+        devicePixelRatio,
+        0,
+        0,
+        devicePixelRatio,
+        0,
+        0
+    );
+
+
+    draw();
 
 }
 
 
 window.addEventListener(
-"resize",
-resize
+    "resize",
+    resize
 );
 
 
+/* ======================================
+   ESCALA
+====================================== */
+
 function scale(){
 
-  return Math.min(
+    return Math.min(
 
-    canvas.clientWidth*.30/
-    (problem.L1+problem.L2),
+        canvas.clientWidth*.30 /
+        (problem.L1+problem.L2),
 
-    canvas.clientHeight*.30/
-    (problem.L1+problem.L2)
+        canvas.clientHeight*.30 /
+        (problem.L1+problem.L2)
 
-  );
+    );
 
 }
 
 
 function origin(){
 
-  return{
+    return {
 
-    x:canvas.clientWidth*.42,
-    y:canvas.clientHeight*.72
+        x:
+        canvas.clientWidth*.40,
 
-  };
+        y:
+        canvas.clientHeight*.74
+
+    };
 
 }
 
 
 function screen(x,y){
 
-  const o=origin();
-  const s=scale();
+    const o =
+    origin();
 
-  return{
-
-    x:o.x+x*s,
-    y:o.y-y*s
-
-  };
-
-}
+    const s =
+    scale();
 
 
-/* =========================
-   PESO CORRETAMENTE POSICIONADO
-========================= */
+    return {
 
-function weightPosition(){
+        x:
+        o.x+x*s,
 
-  /*
-   O peso fica exatamente no ponto
-   que o efetuador alcança em
-   θ1 e θ2 fornecidos.
-  */
+        y:
+        o.y-y*s
 
-  const p=
-  pose(problem.t1,problem.t2);
-
-  return screen(
-    p.x2,
-    p.y2
-  );
+    };
 
 }
 
 
-/* =========================
-   DESENHO
-========================= */
-
-function background(){
-
-  const w=canvas.clientWidth;
-  const h=canvas.clientHeight;
-
-  const g=
-  ctx.createLinearGradient(
-    0,0,0,h
-  );
-
-  g.addColorStop(
-    0,
-    "#f9fcff"
-  );
-
-  g.addColorStop(
-    1,
-    "#e8f0f6"
-  );
-
-  ctx.fillStyle=g;
-
-  ctx.fillRect(
-    0,0,w,h
-  );
-
-
-  ctx.strokeStyle=
-  "rgba(20,50,80,.08)";
-
-  for(let x=0;x<w;x+=45){
-
-    ctx.beginPath();
-    ctx.moveTo(x,0);
-    ctx.lineTo(x,h);
-    ctx.stroke();
-
-  }
-
-  for(let y=0;y<h;y+=45){
-
-    ctx.beginPath();
-    ctx.moveTo(0,y);
-    ctx.lineTo(w,y);
-    ctx.stroke();
-
-  }
-
-
-  ctx.strokeStyle=
-  "#667888";
-
-  ctx.lineWidth=2;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    0,
-    h*.80
-  );
-
-  ctx.lineTo(
-    w,
-    h*.80
-  );
-
-  ctx.stroke();
-
-}
-
+/* ======================================
+   PONTOS DO ROBÔ
+====================================== */
 
 function currentPoints(){
 
-  const p=
-  pose(
-    visual.t1,
-    visual.t2
-  );
+    const p =
+    pose(
+        visual.t1,
+        visual.t2
+    );
 
-  return{
 
-    p0:screen(0,0),
+    return {
 
-    p1:
+        p0:
+        screen(0,0),
+
+        p1:
+        screen(
+            p.x1,
+            p.y1
+        ),
+
+        p2:
+        screen(
+            p.x2,
+            p.y2
+        )
+
+    };
+
+}
+
+
+/* ======================================
+   DIREÇÃO DA FERRAMENTA
+====================================== */
+
+function toolDirection(
+    theta1,
+    theta2
+){
+
+    const angle =
+    rad(
+        theta1 +
+        theta2
+    );
+
+
+    return {
+
+        x:
+        Math.cos(angle),
+
+        y:
+        -Math.sin(angle)
+
+    };
+
+}
+
+
+/* ======================================
+   POSIÇÃO DO PESO
+====================================== */
+
+function pickupWeightPosition(){
+
+    const p =
+    pose(
+        problem.t1,
+        problem.t2
+    );
+
+
+    const tip =
     screen(
-      p.x1,
-      p.y1
-    ),
-
-    p2:
-    screen(
-      p.x2,
-      p.y2
-    )
-
-  };
-
-}
+        p.x2,
+        p.y2
+    );
 
 
-function base(p){
-
-  ctx.fillStyle=
-  "#1c3244";
-
-  ctx.fillRect(
-    p.x-48,
-    p.y+8,
-    96,
-    36
-  );
+    const dir =
+    toolDirection(
+        problem.t1,
+        problem.t2
+    );
 
 
-  ctx.beginPath();
+    return {
 
-  ctx.ellipse(
-    p.x,
-    p.y+8,
-    48,
-    14,
-    0,
-    0,
-    Math.PI*2
-  );
+        x:
+        tip.x +
+        dir.x*38,
 
-  ctx.fillStyle=
-  "#405c70";
+        y:
+        tip.y +
+        dir.y*38
 
-  ctx.fill();
+    };
 
 }
 
 
-function link(a,b){
+/* ======================================
+   FUNDO
+====================================== */
 
-  ctx.lineCap=
-  "round";
+function drawBackground(){
 
-  ctx.strokeStyle=
-  "#0b2944";
+    const w =
+    canvas.clientWidth;
 
-  ctx.lineWidth=38;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    a.x,a.y
-  );
-
-  ctx.lineTo(
-    b.x,b.y
-  );
-
-  ctx.stroke();
+    const h =
+    canvas.clientHeight;
 
 
-  const g=
-  ctx.createLinearGradient(
-    a.x,a.y,
-    b.x,b.y
-  );
-
-  g.addColorStop(
-    0,
-    "#8799a7"
-  );
-
-  g.addColorStop(
-    .45,
-    "#eef4f8"
-  );
-
-  g.addColorStop(
-    1,
-    "#9dafba"
-  );
+    const gradient =
+    ctx.createLinearGradient(
+        0,0,0,h
+    );
 
 
-  ctx.strokeStyle=g;
-  ctx.lineWidth=27;
+    gradient.addColorStop(
+        0,
+        "#f9fcff"
+    );
 
-  ctx.beginPath();
-
-  ctx.moveTo(
-    a.x,a.y
-  );
-
-  ctx.lineTo(
-    b.x,b.y
-  );
-
-  ctx.stroke();
-
-}
+    gradient.addColorStop(
+        1,
+        "#e7eff6"
+    );
 
 
-function joint(p,r){
-
-  ctx.beginPath();
-
-  ctx.arc(
-    p.x,
-    p.y,
-    r+5,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fillStyle=
-  "#102d47";
-
-  ctx.fill();
+    ctx.fillStyle =
+    gradient;
 
 
-  ctx.beginPath();
-
-  ctx.arc(
-    p.x,
-    p.y,
-    r,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fillStyle=
-  "#e1e9ef";
-
-  ctx.fill();
+    ctx.fillRect(
+        0,0,w,h
+    );
 
 
-  ctx.beginPath();
+    ctx.strokeStyle =
+    "rgba(20,50,80,.08)";
 
-  ctx.arc(
-    p.x,
-    p.y,
-    8,
-    0,
-    Math.PI*2
-  );
 
-  ctx.fillStyle=
-  "#f2c23e";
+    for(
+        let x=0;
+        x<w;
+        x+=45
+    ){
 
-  ctx.fill();
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,0
+        );
+
+        ctx.lineTo(
+            x,h
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    for(
+        let y=0;
+        y<h;
+        y+=45
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,y
+        );
+
+        ctx.lineTo(
+            w,y
+        );
+
+        ctx.stroke();
+
+    }
 
 }
 
 
-function gripper(p){
+/* ======================================
+   BASE
+====================================== */
 
-  ctx.strokeStyle=
-  "#18334a";
+function drawBase(p){
 
-  ctx.lineWidth=6;
-
-  ctx.lineCap=
-  "round";
-
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    p.x,
-    p.y
-  );
-
-  ctx.lineTo(
-    p.x+28,
-    p.y-13
-  );
-
-  ctx.stroke();
+    ctx.fillStyle =
+    "#1d3346";
 
 
-  ctx.beginPath();
+    ctx.fillRect(
+        p.x-48,
+        p.y+8,
+        96,
+        36
+    );
 
-  ctx.moveTo(
-    p.x,
-    p.y
-  );
 
-  ctx.lineTo(
-    p.x+28,
-    p.y+13
-  );
+    ctx.beginPath();
 
-  ctx.stroke();
+
+    ctx.ellipse(
+        p.x,
+        p.y+8,
+        48,
+        14,
+        0,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fillStyle =
+    "#405c70";
+
+
+    ctx.fill();
 
 }
 
 
-/* =========================
-   PESO
-========================= */
+/* ======================================
+   ELO
+====================================== */
+
+function drawLink(a,b){
+
+    ctx.lineCap =
+    "round";
+
+
+    ctx.strokeStyle =
+    "#0b2944";
+
+
+    ctx.lineWidth =
+    38;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        a.x,a.y
+    );
+
+    ctx.lineTo(
+        b.x,b.y
+    );
+
+    ctx.stroke();
+
+
+    const gradient =
+    ctx.createLinearGradient(
+        a.x,a.y,
+        b.x,b.y
+    );
+
+
+    gradient.addColorStop(
+        0,
+        "#8496a5"
+    );
+
+    gradient.addColorStop(
+        .48,
+        "#f3f7fa"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#99abb8"
+    );
+
+
+    ctx.strokeStyle =
+    gradient;
+
+
+    ctx.lineWidth =
+    27;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        a.x,a.y
+    );
+
+    ctx.lineTo(
+        b.x,b.y
+    );
+
+    ctx.stroke();
+
+}
+
+
+/* ======================================
+   JUNTA
+====================================== */
+
+function drawJoint(p,r){
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,p.y,
+        r+5,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fillStyle =
+    "#102d47";
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,p.y,
+        r,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fillStyle =
+    "#e0e8ee";
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,p.y,
+        8,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fillStyle =
+    "#f3c542";
+
+    ctx.fill();
+
+}
+
+
+/* ======================================
+   GARRA
+====================================== */
+
+function drawGripper(p){
+
+    const direction =
+    toolDirection(
+        visual.t1,
+        visual.t2
+    );
+
+
+    const perpendicular = {
+
+        x:
+        -direction.y,
+
+        y:
+        direction.x
+
+    };
+
+
+    const start = {
+
+        x:
+        p.x +
+        direction.x*5,
+
+        y:
+        p.y +
+        direction.y*5
+
+    };
+
+
+    const end = {
+
+        x:
+        p.x +
+        direction.x*32,
+
+        y:
+        p.y +
+        direction.y*32
+
+    };
+
+
+    ctx.strokeStyle =
+    "#18334a";
+
+
+    ctx.lineWidth =
+    6;
+
+
+    ctx.lineCap =
+    "round";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        start.x,
+        start.y
+    );
+
+
+    ctx.lineTo(
+        end.x +
+        perpendicular.x*12,
+
+        end.y +
+        perpendicular.y*12
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        start.x,
+        start.y
+    );
+
+
+    ctx.lineTo(
+        end.x -
+        perpendicular.x*12,
+
+        end.y -
+        perpendicular.y*12
+    );
+
+
+    ctx.stroke();
+
+}
+
+
+/* ======================================
+   DESENHAR PESO
+====================================== */
 
 function drawWeight(){
 
-  let p;
+    let position;
 
-  if(visual.holding){
 
-    const pts=
-    currentPoints();
+    if(
+        visual.holding
+    ){
 
-    p={
-      x:pts.p2.x+34,
-      y:pts.p2.y+5
-    };
+        const points =
+        currentPoints();
 
-  }
 
-  else{
+        const dir =
+        toolDirection(
+            visual.t1,
+            visual.t2
+        );
 
-    const target=
-    weightPosition();
 
-    p={
-      x:target.x+34,
-      y:target.y+5
-    };
+        position = {
 
-  }
+            x:
+            points.p2.x +
+            dir.x*40,
 
+            y:
+            points.p2.y +
+            dir.y*40
 
-  ctx.fillStyle=
-  "#374a59";
-
-  ctx.fillRect(
-    p.x-24,
-    p.y-18,
-    48,
-    38
-  );
-
-
-  ctx.strokeStyle=
-  "#374a59";
-
-  ctx.lineWidth=7;
-
-  ctx.beginPath();
-
-  ctx.arc(
-    p.x,
-    p.y-18,
-    11,
-    Math.PI,
-    0
-  );
-
-  ctx.stroke();
-
-
-  ctx.fillStyle=
-  "white";
-
-  ctx.font=
-  "bold 11px Arial";
-
-  ctx.textAlign=
-  "center";
-
-  const label=
-  visual.selectedMass
-  ? visual.selectedMass+" kg"
-  : "PESO";
-
-  ctx.fillText(
-    label,
-    p.x,
-    p.y+5
-  );
-
-}
-
-
-/* =========================
-   BRAÇO DESMONTADO
-========================= */
-
-function brokenRobot(pts){
-
-  const a={
-    x:pts.p0.x-15,
-    y:pts.p0.y+40
-  };
-
-  const b={
-    x:pts.p1.x-50,
-    y:pts.p1.y+100
-  };
-
-  const c={
-    x:pts.p1.x+60,
-    y:pts.p1.y+120
-  };
-
-  const d={
-    x:pts.p2.x+90,
-    y:pts.p2.y+180
-  };
-
-  link(a,b);
-  link(c,d);
-
-  joint(
-    a,
-    18
-  );
-
-  joint(
-    c,
-    17
-  );
-
-}
-
-
-/* =========================
-   DRAW PRINCIPAL
-========================= */
-
-function draw(){
-
-  background();
-
-  const pts=
-  currentPoints();
-
-  base(
-    pts.p0
-  );
-
-
-  if(visual.broken){
-
-    brokenRobot(
-      pts
-    );
-
-    drawWeight();
-
-    return;
-
-  }
-
-
-  link(
-    pts.p0,
-    pts.p1
-  );
-
-  link(
-    pts.p1,
-    pts.p2
-  );
-
-
-  joint(
-    pts.p0,
-    22
-  );
-
-  joint(
-    pts.p1,
-    20
-  );
-
-  joint(
-    pts.p2,
-    16
-  );
-
-
-  gripper(
-    pts.p2
-  );
-
-
-  drawWeight();
-
-}
-
-
-/* =========================
-   SOM DE ERRO
-========================= */
-
-function errorSound(){
-
-  try{
-
-    if(!audioCtx){
-
-      audioCtx=
-      new(
-        window.AudioContext ||
-        window.webkitAudioContext
-      )();
+        };
 
     }
-
-
-    const osc=
-    audioCtx.createOscillator();
-
-    const gain=
-    audioCtx.createGain();
-
-
-    osc.type=
-    "sawtooth";
-
-    osc.frequency.setValueAtTime(
-      250,
-      audioCtx.currentTime
-    );
-
-    osc.frequency.exponentialRampToValueAtTime(
-      80,
-      audioCtx.currentTime+.6
-    );
-
-
-    gain.gain.setValueAtTime(
-      .18,
-      audioCtx.currentTime
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      .001,
-      audioCtx.currentTime+.6
-    );
-
-
-    osc.connect(
-      gain
-    );
-
-    gain.connect(
-      audioCtx.destination
-    );
-
-
-    osc.start();
-
-    osc.stop(
-      audioCtx.currentTime+.6
-    );
-
-  }
-
-  catch(e){}
-
-}
-
-
-/* =========================
-   EASING
-========================= */
-
-function ease(t){
-
-  return t<.5
-
-  ? 2*t*t
-
-  : 1-
-  Math.pow(
-    -2*t+2,
-    2
-  )/2;
-
-}
-
-
-/* =========================
-   POSE DE ELEVAÇÃO
-========================= */
-
-function liftPose(){
-
-  const original=
-  pose(
-    problem.t1,
-    problem.t2
-  );
-
-
-  const options=[
-
-    [problem.t1+20,
-     problem.t2-10],
-
-    [problem.t1+15,
-     problem.t2],
-
-    [problem.t1+25,
-     problem.t2-20],
-
-    [problem.t1+10,
-     problem.t2+10]
-
-  ];
-
-
-  let best=
-  options[0];
-
-  let bestY=
-  -Infinity;
-
-
-  for(
-    const o of options
-  ){
-
-    const p=
-    pose(
-      o[0],
-      o[1]
-    );
-
-    if(p.y2>bestY){
-
-      bestY=
-      p.y2;
-
-      best=o;
-
-    }
-
-  }
-
-
-  return{
-
-    t1:best[0],
-    t2:best[1]
-
-  };
-
-}
-
-
-/* =========================
-   ANIMAÇÃO DE SUCESSO
-========================= */
-
-function successAnimation(){
-
-  cancelAnimationFrame(
-    animation
-  );
-
-
-  visual.broken=false;
-  visual.holding=false;
-
-
-  const startPose={
-    t1:70,
-    t2:-65
-  };
-
-
-  visual.t1=
-  startPose.t1;
-
-  visual.t2=
-  startPose.t2;
-
-
-  const lift=
-  liftPose();
-
-
-  const start=
-  performance.now();
-
-
-  function frame(now){
-
-    const time=
-    now-start;
-
-
-    /*
-      Fase 1:
-      vai até o peso
-    */
-
-    if(time<2200){
-
-      const k=
-      ease(
-        time/2200
-      );
-
-
-      visual.t1=
-      startPose.t1+
-      (
-        problem.t1-
-        startPose.t1
-      )*k;
-
-
-      visual.t2=
-      startPose.t2+
-      (
-        problem.t2-
-        startPose.t2
-      )*k;
-
-
-      robotStatus.innerHTML=
-      "<strong>Estado:</strong> aproximando a garra da carga.";
-
-    }
-
-
-    /*
-      Fase 2:
-      segura o peso
-    */
-
-    else if(time<2900){
-
-      visual.t1=
-      problem.t1;
-
-      visual.t2=
-      problem.t2;
-
-      visual.holding=
-      true;
-
-
-      robotStatus.innerHTML=
-      "<strong>Estado:</strong> carga agarrada.";
-
-    }
-
-
-    /*
-      Fase 3:
-      levanta
-    */
-
-    else if(time<5000){
-
-      visual.holding=
-      true;
-
-      const k=
-      ease(
-        (time-2900)/
-        2100
-      );
-
-
-      visual.t1=
-      problem.t1+
-      (
-        lift.t1-
-        problem.t1
-      )*k;
-
-
-      visual.t2=
-      problem.t2+
-      (
-        lift.t2-
-        problem.t2
-      )*k;
-
-
-      robotStatus.innerHTML=
-      "<strong>Estado:</strong> suspendendo a carga.";
-
-    }
-
 
     else{
 
-      visual.holding=
-      true;
-
-      visual.t1=
-      lift.t1;
-
-      visual.t2=
-      lift.t2;
-
-
-      robotStatus.innerHTML=
-      "<strong>Estado:</strong> carga suspensa com sucesso.";
-
-      draw();
-
-      return;
+        position =
+        pickupWeightPosition();
 
     }
+
+
+    ctx.fillStyle =
+    "#374a59";
+
+
+    ctx.fillRect(
+        position.x-25,
+        position.y-18,
+        50,
+        38
+    );
+
+
+    ctx.strokeStyle =
+    "#374a59";
+
+
+    ctx.lineWidth =
+    7;
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        position.x,
+        position.y-18,
+        11,
+        Math.PI,
+        0
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+    "white";
+
+
+    ctx.font =
+    "bold 11px Arial";
+
+
+    ctx.textAlign =
+    "center";
+
+
+    const label =
+    visual.selectedMass
+    ? visual.selectedMass+" kg"
+    : "PESO";
+
+
+    ctx.fillText(
+        label,
+        position.x,
+        position.y+5
+    );
+
+}
+
+
+/* ======================================
+   BRAÇO QUEBRADO
+====================================== */
+
+function drawBroken(points){
+
+    const a = {
+
+        x:
+        points.p0.x-10,
+
+        y:
+        points.p0.y+35
+    };
+
+
+    const b = {
+
+        x:
+        points.p1.x-50,
+
+        y:
+        points.p1.y+110
+    };
+
+
+    const c = {
+
+        x:
+        points.p1.x+60,
+
+        y:
+        points.p1.y+120
+    };
+
+
+    const d = {
+
+        x:
+        points.p2.x+100,
+
+        y:
+        points.p2.y+190
+    };
+
+
+    drawLink(a,b);
+
+    drawLink(c,d);
+
+
+    drawJoint(
+        a,
+        18
+    );
+
+
+    drawJoint(
+        c,
+        17
+    );
+
+}
+
+
+/* ======================================
+   DESENHO PRINCIPAL
+====================================== */
+
+function draw(){
+
+    drawBackground();
+
+
+    const points =
+    currentPoints();
+
+
+    drawBase(
+        points.p0
+    );
+
+
+    if(
+        visual.broken
+    ){
+
+        drawBroken(
+            points
+        );
+
+        drawWeight();
+
+        return;
+
+    }
+
+
+    drawLink(
+        points.p0,
+        points.p1
+    );
+
+
+    drawLink(
+        points.p1,
+        points.p2
+    );
+
+
+    drawJoint(
+        points.p0,
+        22
+    );
+
+
+    drawJoint(
+        points.p1,
+        20
+    );
+
+
+    drawJoint(
+        points.p2,
+        16
+    );
+
+
+    drawGripper(
+        points.p2
+    );
+
+
+    drawWeight();
+
+}
+
+
+/* ======================================
+   SOM DE ERRO
+====================================== */
+
+function playErrorSound(){
+
+    try{
+
+        if(!audioCtx){
+
+            audioCtx =
+            new(
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+        }
+
+
+        const oscillator =
+        audioCtx.createOscillator();
+
+
+        const gain =
+        audioCtx.createGain();
+
+
+        oscillator.type =
+        "sawtooth";
+
+
+        oscillator.frequency
+        .setValueAtTime(
+            260,
+            audioCtx.currentTime
+        );
+
+
+        oscillator.frequency
+        .exponentialRampToValueAtTime(
+            75,
+            audioCtx.currentTime+.65
+        );
+
+
+        gain.gain
+        .setValueAtTime(
+            .20,
+            audioCtx.currentTime
+        );
+
+
+        gain.gain
+        .exponentialRampToValueAtTime(
+            .001,
+            audioCtx.currentTime+.65
+        );
+
+
+        oscillator.connect(
+            gain
+        );
+
+
+        gain.connect(
+            audioCtx.destination
+        );
+
+
+        oscillator.start();
+
+
+        oscillator.stop(
+            audioCtx.currentTime+.65
+        );
+
+    }
+
+    catch(e){}
+
+}
+
+
+/* ======================================
+   EASING
+====================================== */
+
+function ease(t){
+
+    return t < .5
+
+    ? 2*t*t
+
+    : 1 -
+    Math.pow(
+        -2*t+2,
+        2
+    ) / 2;
+
+}
+
+
+/* ======================================
+   ANIMAÇÃO CORRETA
+====================================== */
+
+function successfulAnimation(){
+
+    cancelAnimationFrame(
+        animation
+    );
+
+
+    const rest =
+    restPose();
+
+
+    const pickup = {
+
+        t1:
+        problem.t1,
+
+        t2:
+        problem.t2
+
+    };
+
+
+    const lift =
+    findHigherPose();
+
+
+    visual.broken =
+    false;
+
+
+    visual.holding =
+    false;
+
+
+    visual.t1 =
+    rest.t1;
+
+
+    visual.t2 =
+    rest.t2;
+
+
+    const start =
+    performance.now();
+
+
+    function frame(now){
+
+        const time =
+        now-start;
+
+
+        /*
+           1 - REPOUSO
+        */
+
+        if(
+            time < 900
+        ){
+
+            visual.t1 =
+            rest.t1;
+
+            visual.t2 =
+            rest.t2;
+
+            visual.holding =
+            false;
+
+
+            robotStatus.innerHTML =
+            "<strong>Estado:</strong> manipulador em repouso.";
+
+        }
+
+
+        /*
+           2 - DESCE ATÉ O PESO
+        */
+
+        else if(
+            time < 3900
+        ){
+
+            const k =
+            ease(
+                (time-900) /
+                3000
+            );
+
+
+            visual.t1 =
+            rest.t1 +
+            (
+                pickup.t1 -
+                rest.t1
+            ) * k;
+
+
+            visual.t2 =
+            rest.t2 +
+            (
+                pickup.t2 -
+                rest.t2
+            ) * k;
+
+
+            visual.holding =
+            false;
+
+
+            robotStatus.innerHTML =
+            "<strong>Estado:</strong> aproximando-se da carga.";
+
+        }
+
+
+        /*
+           3 - GARRA ALINHADA
+        */
+
+        else if(
+            time < 4700
+        ){
+
+            visual.t1 =
+            pickup.t1;
+
+            visual.t2 =
+            pickup.t2;
+
+            visual.holding =
+            false;
+
+
+            robotStatus.innerHTML =
+            "<strong>Estado:</strong> efetuador posicionado sobre a carga.";
+
+        }
+
+
+        /*
+           4 - PEGA O PESO
+        */
+
+        else if(
+            time < 5500
+        ){
+
+            visual.t1 =
+            pickup.t1;
+
+            visual.t2 =
+            pickup.t2;
+
+            visual.holding =
+            true;
+
+
+            robotStatus.innerHTML =
+            "<strong>Estado:</strong> carga agarrada.";
+
+        }
+
+
+        /*
+           5 - LEVANTA
+        */
+
+        else if(
+            time < 8500
+        ){
+
+            const k =
+            ease(
+                (time-5500) /
+                3000
+            );
+
+
+            visual.t1 =
+            pickup.t1 +
+            (
+                lift.t1 -
+                pickup.t1
+            ) * k;
+
+
+            visual.t2 =
+            pickup.t2 +
+            (
+                lift.t2 -
+                pickup.t2
+            ) * k;
+
+
+            visual.holding =
+            true;
+
+
+            robotStatus.innerHTML =
+            "<strong>Estado:</strong> suspendendo a carga.";
+
+        }
+
+
+        /*
+           6 - FINAL
+        */
+
+        else{
+
+            visual.t1 =
+            lift.t1;
+
+            visual.t2 =
+            lift.t2;
+
+            visual.holding =
+            true;
+
+
+            robotStatus.innerHTML =
+            "<strong>Estado:</strong> carga suspensa com sucesso.";
+
+
+            draw();
+
+            return;
+
+        }
+
+
+        draw();
+
+
+        animation =
+        requestAnimationFrame(
+            frame
+        );
+
+    }
+
+
+    animation =
+    requestAnimationFrame(
+        frame
+    );
+
+}
+
+
+/* ======================================
+   ANIMAÇÃO DE FALHA
+====================================== */
+
+function failureAnimation(message){
+
+    cancelAnimationFrame(
+        animation
+    );
+
+
+    visual.holding =
+    false;
+
+
+    visual.t1 =
+    problem.t1;
+
+
+    visual.t2 =
+    problem.t2;
 
 
     draw();
 
 
-    animation=
-    requestAnimationFrame(
-      frame
+    setTimeout(
+        ()=>{
+
+            visual.broken =
+            true;
+
+
+            robotStatus.innerHTML =
+            "<strong>FALHA:</strong> "+
+            message;
+
+
+            playErrorSound();
+
+
+            draw();
+
+        },
+        650
     );
 
-  }
+}
 
 
-  animation=
-  requestAnimationFrame(
-    frame
-  );
+/* ======================================
+   FORMATAÇÃO
+====================================== */
+
+function format(value){
+
+    if(
+        Math.abs(value) <
+        .0005
+    ){
+
+        value = 0;
+
+    }
+
+
+    return value.toFixed(3);
 
 }
 
 
-/* =========================
-   ANIMAÇÃO DE FALHA
-========================= */
-
-function failAnimation(reason){
-
-  cancelAnimationFrame(
-    animation
-  );
-
-
-  visual.holding=false;
-
-  visual.t1=
-  problem.t1;
-
-  visual.t2=
-  problem.t2;
-
-
-  draw();
-
-
-  setTimeout(
-    ()=>{
-
-      visual.broken=true;
-
-      robotStatus.innerHTML=
-      "<strong>FALHA:</strong> "+
-      reason;
-
-      errorSound();
-
-      draw();
-
-    },
-    650
-  );
-
-}
-
-
-/* =========================
-   RESULTADOS VELOCIDADE
-========================= */
-
-let currentProgram=
-null;
-
-
-function format(x){
-
-  if(
-    Math.abs(x)<.0005
-  ){
-
-    x=0;
-
-  }
-
-  return x.toFixed(3);
-
-}
-
-
-/* =========================
+/* ======================================
    COMPILAR
-========================= */
+====================================== */
 
-function compile(){
+function compileProgram(){
 
-  success.style.display=
-  "none";
-
-  failure.style.display=
-  "none";
-
-  weightPanel.style.display=
-  "none";
+    success.style.display =
+    "none";
 
 
-  const data=
-  readCode();
+    failure.style.display =
+    "none";
 
 
-  const required=[
-
-    data.J11,
-    data.J12,
-    data.J21,
-    data.J22,
-    data.w1,
-    data.w2
-
-  ];
+    weightPanel.style.display =
+    "none";
 
 
-  if(
-    required.some(
-      n=>!Number.isFinite(n)
-    )
-  ){
-
-    consoleEl.textContent=
-    "Erro de compilação.\n"+
-    "Confira os valores digitados.";
-
-    return;
-
-  }
+    const data =
+    readCode();
 
 
-  consoleEl.textContent=
-  "Compilando...\n"+
-  "Validando Jacobiana...";
+    if(
+        [
+            data.J11,
+            data.J12,
+            data.J21,
+            data.J22,
+            data.w1,
+            data.w2
+        ]
+        .some(
+            value =>
+            !Number.isFinite(value)
+        )
+    ){
+
+        consoleEl.textContent =
+        "Erro de compilação.\n"+
+        "Confira os valores digitados.";
+
+        return;
+
+    }
 
 
-  if(
-    !validJacobian(data)
-  ){
+    consoleEl.textContent =
+    "Compilando...\n"+
+    "Validando Jacobiana...";
 
-    consoleEl.textContent+=
-    "\n\nJACOBIANA INCORRETA."+
-    "\nTente novamente.";
 
-    failure.textContent=
-    "JACOBIANA ERRADA — TENTE NOVAMENTE";
+    if(
+        !validateJacobian(data)
+    ){
 
-    failure.style.display=
+        consoleEl.textContent +=
+        "\n\nJACOBIANA INCORRETA."+
+        "\nTente novamente.";
+
+
+        failure.textContent =
+        "JACOBIANA ERRADA — TENTE NOVAMENTE";
+
+
+        failure.style.display =
+        "block";
+
+
+        failureAnimation(
+            "Jacobiana incorreta."
+        );
+
+
+        return;
+
+    }
+
+
+    currentProgram =
+    data;
+
+
+    const v =
+    velocity(data);
+
+
+    const speed =
+    Math.hypot(
+        v.vx,
+        v.vy
+    );
+
+
+    vxOut.textContent =
+    format(v.vx)+" m/s";
+
+
+    vyOut.textContent =
+    format(v.vy)+" m/s";
+
+
+    w1Out.textContent =
+    format(data.w1)+" rad/s";
+
+
+    w2Out.textContent =
+    format(data.w2)+" rad/s";
+
+
+    speedIndicator.textContent =
+    format(speed)+" m/s";
+
+
+    consoleEl.textContent +=
+    "\nJacobiana correta."+
+    "\n\nAgora analise os torques máximos"+
+    "\ne escolha uma carga.";
+
+
+    robotStatus.innerHTML =
+    "<strong>Estado:</strong> Jacobiana validada. Escolha a carga.";
+
+
+    createWeightButtons();
+
+
+    weightPanel.style.display =
     "block";
 
 
-    failAnimation(
-      "Jacobiana incorreta."
-    );
+    const rest =
+    restPose();
 
 
-    return;
-
-  }
-
-
-  currentProgram=
-  data;
+    visual.broken =
+    false;
 
 
-  const v=
-  velocity(data);
+    visual.holding =
+    false;
 
 
-  const speed=
-  Math.hypot(
-    v.vx,
-    v.vy
-  );
+    visual.selectedMass =
+    0;
 
 
-  vxOut.textContent=
-  format(v.vx)+" m/s";
-
-  vyOut.textContent=
-  format(v.vy)+" m/s";
-
-  w1Out.textContent=
-  format(data.w1)+" rad/s";
-
-  w2Out.textContent=
-  format(data.w2)+" rad/s";
-
-  speedIndicator.textContent=
-  format(speed)+" m/s";
+    visual.t1 =
+    rest.t1;
 
 
-  consoleEl.textContent+=
-  "\nJacobiana correta."+
-  "\n\nAgora escolha uma carga.";
+    visual.t2 =
+    rest.t2;
 
 
-  robotStatus.innerHTML=
-  "<strong>Estado:</strong> Jacobiana validada. Escolha o peso.";
-
-
-  createWeightButtons();
-
-
-  weightPanel.style.display=
-  "block";
-
-
-  visual.broken=false;
-
-  visual.holding=false;
-
-  visual.t1=70;
-
-  visual.t2=-65;
-
-  draw();
+    draw();
 
 }
 
 
-/* =========================
+/* ======================================
    BOTÕES DE PESO
-========================= */
+====================================== */
 
 function createWeightButtons(){
 
-  weights.innerHTML="";
+    weightButtons.innerHTML =
+    "";
 
 
-  const masses=[
-    .5,
-    1,
-    2,
-    3,
-    5,
-    8,
-    10,
-    15
-  ];
+    const options =
+    makeMassOptions();
 
 
-  for(
-    const mass of masses
-  ){
+    for(
+        const mass of options
+    ){
 
-    const btn=
-    document.createElement(
-      "button"
-    );
-
-
-    btn.className=
-    "weight-btn";
+        const button =
+        document.createElement(
+            "button"
+        );
 
 
-    btn.textContent=
-    mass+" kg";
+        button.className =
+        "weight-btn";
 
 
-    btn.addEventListener(
-      "click",
-      ()=>selectWeight(mass)
-    );
+        button.textContent =
+        mass.toFixed(1)+" kg";
 
 
-    weights.appendChild(
-      btn
-    );
+        button.addEventListener(
+            "click",
+            ()=>{
+                chooseWeight(mass);
+            }
+        );
 
-  }
+
+        weightButtons.appendChild(
+            button
+        );
+
+    }
 
 }
 
 
-/* =========================
+/* ======================================
    ESCOLHA DO PESO
-========================= */
+====================================== */
 
-function selectWeight(mass){
+function chooseWeight(mass){
 
-  if(!currentProgram){
-    return;
-  }
-
-
-  success.style.display=
-  "none";
-
-  failure.style.display=
-  "none";
+    if(
+        !currentProgram
+    ){
+        return;
+    }
 
 
-  visual.selectedMass=
-  mass;
+    success.style.display =
+    "none";
 
 
-  const t=
-  loadTorque(mass);
+    failure.style.display =
+    "none";
 
 
-  forceOut.textContent=
-  format(t.force)+" N";
+    visual.selectedMass =
+    mass;
 
 
-  torqueOut.textContent=
-  "τ₁="+
-  format(t.tau1)+
-  " | τ₂="+
-  format(t.tau2)+
-  " N·m";
+    const values =
+    loadTorque(mass);
 
 
-  tau1Indicator.textContent=
-  format(
-    Math.abs(t.tau1)
-  )+
-  " / "+
-  problem.torqueMax1+
-  " N·m";
+    forceOut.textContent =
+    format(values.force)+" N";
 
 
-  tau2Indicator.textContent=
-  format(
-    Math.abs(t.tau2)
-  )+
-  " / "+
-  problem.torqueMax2+
-  " N·m";
+    torqueOut.textContent =
+    "τ₁="+
+    format(values.tau1)+
+    " | τ₂="+
+    format(values.tau2)+
+    " N·m";
 
 
-  loadIndicator.textContent=
-  mass+" kg";
+    tau1Indicator.textContent =
+    format(
+        Math.abs(values.tau1)
+    )+
+    " / "+
+    problem.torqueMax1+
+    " N·m";
 
 
-  if(
-    loadIsSafe(mass)
-  ){
-
-    success.textContent=
-    "Carga de "+
-    mass+
-    " kg compatível com os motores.";
-
-    success.style.display=
-    "block";
+    tau2Indicator.textContent =
+    format(
+        Math.abs(values.tau2)
+    )+
+    " / "+
+    problem.torqueMax2+
+    " N·m";
 
 
-    consoleEl.textContent+=
-    "\n\nCarga selecionada: "+
-    mass+
-    " kg"+
-    "\nForça peso: "+
-    format(t.force)+
-    " N"+
-    "\nτ1 = "+
-    format(t.tau1)+
-    " N·m"+
-    "\nτ2 = "+
-    format(t.tau2)+
-    " N·m"+
-    "\n\nCarga suportada.";
+    loadIndicator.textContent =
+    mass.toFixed(1)+" kg";
 
 
-    successAnimation();
+    const safe =
 
-  }
+    Math.abs(values.tau1)
+    <=
+    problem.torqueMax1
 
+    &&
 
-  else{
-
-    failure.textContent=
-    "SOBRECARGA — TORQUE INSUFICIENTE";
-
-    failure.style.display=
-    "block";
-
-
-    consoleEl.textContent+=
-    "\n\nCarga selecionada: "+
-    mass+
-    " kg"+
-    "\nTorque exigido acima do limite."+
-    "\nFalha estrutural.";
+    Math.abs(values.tau2)
+    <=
+    problem.torqueMax2;
 
 
-    failAnimation(
-      "sobrecarga nos motores."
+    if(safe){
+
+        success.textContent =
+        "Carga compatível. Manipulador executando a tarefa.";
+
+
+        success.style.display =
+        "block";
+
+
+        consoleEl.textContent +=
+
+        "\n\nCarga selecionada: "+
+        mass.toFixed(1)+
+        " kg"+
+
+        "\nForça peso: "+
+        format(values.force)+
+        " N"+
+
+        "\nTorque J1: "+
+        format(values.tau1)+
+        " N·m"+
+
+        "\nTorque J2: "+
+        format(values.tau2)+
+        " N·m"+
+
+        "\n\nCARGA SUPORTADA.";
+
+
+        successfulAnimation();
+
+    }
+
+    else{
+
+        failure.textContent =
+        "SOBRECARGA — TORQUE INSUFICIENTE";
+
+
+        failure.style.display =
+        "block";
+
+
+        consoleEl.textContent +=
+
+        "\n\nCarga selecionada: "+
+        mass.toFixed(1)+
+        " kg"+
+
+        "\nTorque exigido acima do limite."+
+
+        "\nFalha do manipulador.";
+
+
+        failureAnimation(
+            "sobrecarga."
+        );
+
+    }
+
+}
+
+
+/* ======================================
+   RESET
+====================================== */
+
+function resetSystem(){
+
+    cancelAnimationFrame(
+        animation
     );
 
-  }
+
+    currentProgram =
+    null;
+
+
+    visual = {
+
+        t1:0,
+        t2:0,
+
+        broken:false,
+        holding:false,
+
+        selectedMass:0
+
+    };
+
+
+    const rest =
+    restPose();
+
+
+    visual.t1 =
+    rest.t1;
+
+
+    visual.t2 =
+    rest.t2;
+
+
+    weightPanel.style.display =
+    "none";
+
+
+    success.style.display =
+    "none";
+
+
+    failure.style.display =
+    "none";
+
+
+    vxOut.textContent =
+    "—";
+
+
+    vyOut.textContent =
+    "—";
+
+
+    w1Out.textContent =
+    "—";
+
+
+    w2Out.textContent =
+    "—";
+
+
+    forceOut.textContent =
+    "—";
+
+
+    torqueOut.textContent =
+    "—";
+
+
+    speedIndicator.textContent =
+    "—";
+
+
+    loadIndicator.textContent =
+    "—";
+
+
+    tau1Indicator.textContent =
+    "—";
+
+
+    tau2Indicator.textContent =
+    "—";
+
+
+    robotStatus.innerHTML =
+    "<strong>Estado:</strong> manipulador em repouso.";
+
+
+    draw();
 
 }
 
 
-/* =========================
-   RESET
-========================= */
-
-function reset(){
-
-  cancelAnimationFrame(
-    animation
-  );
-
-
-  visual={
-
-    t1:70,
-    t2:-65,
-    broken:false,
-    holding:false,
-    selectedMass:0
-
-  };
-
-
-  currentProgram=null;
-
-
-  weightPanel.style.display=
-  "none";
-
-  success.style.display=
-  "none";
-
-  failure.style.display=
-  "none";
-
-
-  vxOut.textContent="—";
-  vyOut.textContent="—";
-  w1Out.textContent="—";
-  w2Out.textContent="—";
-  forceOut.textContent="—";
-  torqueOut.textContent="—";
-
-  speedIndicator.textContent="—";
-  loadIndicator.textContent="—";
-  tau1Indicator.textContent="—";
-  tau2Indicator.textContent="—";
-
-
-  robotStatus.innerHTML=
-  "<strong>Estado:</strong> aguardando programação.";
-
-
-  draw();
-
-}
-
-
-/* =========================
+/* ======================================
    NOVO PROBLEMA
-========================= */
+====================================== */
 
-function randomItem(list){
+function randomItem(array){
 
-  return list[
-    Math.floor(
-      Math.random()*list.length
-    )
-  ];
+    return array[
+        Math.floor(
+            Math.random()*
+            array.length
+        )
+    ];
 
 }
 
 
 function newProblem(){
 
-  problem.L1=
-  randomItem(
-    [.8,1,1.2,1.4]
-  );
+    problem.L1 =
+    randomItem(
+        [.8,1,1.2,1.4]
+    );
 
 
-  problem.L2=
-  randomItem(
-    [.5,.6,.7,.8,1]
-  );
+    problem.L2 =
+    randomItem(
+        [.5,.6,.7,.8,1]
+    );
 
 
-  problem.t1=
-  randomItem(
-    [20,30,35,40,45,50]
-  );
+    problem.t1 =
+    randomItem(
+        [20,30,35,40,45,50]
+    );
 
 
-  problem.t2=
-  randomItem(
-    [25,30,40,45,50,60]
-  );
+    problem.t2 =
+    randomItem(
+        [25,30,40,45,50,60]
+    );
 
 
-  problem.torqueMax1=
-  randomItem(
-    [15,18,20,22,25]
-  );
+    problem.torqueMax1 =
+    randomItem(
+        [15,18,20,22,25]
+    );
 
 
-  problem.torqueMax2=
-  randomItem(
-    [7,9,10,12,14]
-  );
+    problem.torqueMax2 =
+    randomItem(
+        [7,9,10,12,14]
+    );
 
 
-  updateProblem();
+    updateProblem();
 
 
-  reset();
+    resetSystem();
 
 
-  consoleEl.textContent=
-  "Novo problema gerado.\n"+
-  "Calcule a Jacobiana à mão.";
+    consoleEl.textContent =
+    "Novo problema gerado.\n"+
+    "Calcule a Jacobiana à mão.";
 
 }
 
 
-/* =========================
-   ATUALIZAÇÃO DO PAINEL
-========================= */
+/* ======================================
+   PAINEL
+====================================== */
 
 function updateProblem(){
 
-  L1view.textContent=
-  problem.L1.toFixed(2)+" m";
+    L1view.textContent =
+    problem.L1.toFixed(2)+" m";
 
-  L2view.textContent=
-  problem.L2.toFixed(2)+" m";
 
-  T1view.textContent=
-  problem.t1+"°";
+    L2view.textContent =
+    problem.L2.toFixed(2)+" m";
 
-  T2view.textContent=
-  problem.t2+"°";
 
-  TM1view.textContent=
-  problem.torqueMax1+" N·m";
+    T1view.textContent =
+    problem.t1+"°";
 
-  TM2view.textContent=
-  problem.torqueMax2+" N·m";
+
+    T2view.textContent =
+    problem.t2+"°";
+
+
+    TM1view.textContent =
+    problem.torqueMax1+" N·m";
+
+
+    TM2view.textContent =
+    problem.torqueMax2+" N·m";
 
 }
 
 
-/* =========================
+/* ======================================
    EVENTOS
-========================= */
+====================================== */
 
 document
 .getElementById("run")
 .addEventListener(
-  "click",
-  compile
+    "click",
+    compileProgram
 );
 
 
 document
 .getElementById("reset")
 .addEventListener(
-  "click",
-  reset
+    "click",
+    resetSystem
 );
 
 
 document
 .getElementById("newProblem")
 .addEventListener(
-  "click",
-  newProblem
+    "click",
+    newProblem
 );
 
 
-/* =========================
+/* ======================================
    INICIALIZAÇÃO
-========================= */
+====================================== */
 
 updateProblem();
 
 resize();
 
-reset();
+resetSystem();
 
 </script>
 
