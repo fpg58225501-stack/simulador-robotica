@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratório Arduino + Jacobiana</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #071a33, #0b2f59 55%, #06111f);
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 18px 24px;
+      text-align: center;
+      border-bottom: 4px solid #f4c542;
+      background: rgba(0,0,0,.18);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 7px 0 0;
+      color: #d9e8f5;
+      font-size: 14px;
+    }
+
+    .topData {
+      max-width: 1500px;
+      margin: 18px auto 0;
+      padding: 0 18px;
+    }
+
+    .problemCard {
+      background: #fff;
+      color: #14243a;
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+    }
+
+    .datum {
+      background: #eef5fb;
+      border: 1px solid #d6e3ef;
+      border-radius: 10px;
+      padding: 11px;
+      text-align: center;
+    }
+
+    .datum small {
+      display: block;
+      color: #607080;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .datum strong {
+      font-size: 20px;
+      color: #083b75;
+    }
+
+    .newProblem {
+      border: none;
+      background: #f4c542;
+      color: #172033;
+      font-weight: bold;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      min-height: 46px;
+    }
+
+    .main {
+      max-width: 1500px;
+      margin: 18px auto;
+      padding: 0 18px 20px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: #fff;
+      color: #14243a;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.26);
+      overflow: hidden;
+    }
+
+    .cardHeader {
+      background: #0a3e72;
+      color: #fff;
+      padding: 13px 16px;
+      font-weight: bold;
+    }
+
+    .robotArea {
+      position: relative;
+      min-height: 650px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 650px;
+      background: linear-gradient(#f8fbff, #edf3f8);
+    }
+
+    .robotStatus {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      padding: 10px 13px;
+      border-radius: 10px;
+      background: rgba(5,29,55,.88);
+      color: white;
+      font-size: 13px;
+      max-width: 260px;
+    }
+
+    .robotStatus strong {
+      color: #f4c542;
+    }
+
+    .editorWrap {
+      padding: 16px;
+    }
+
+    .editorTitle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .editorTitle strong {
+      color: #083b75;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 350px;
+      resize: vertical;
+      border: none;
+      outline: none;
+      border-radius: 12px;
+      background: #111827;
+      color: #d9f7ff;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 15px;
+      line-height: 1.5;
+      padding: 16px;
+      tab-size: 2;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .runBtn { background:#0d72d8; color:#fff; }
+    .resetBtn { background:#34495e; color:#fff; }
+    .exampleBtn { background:#e6edf4; color:#17304a; }
+
+    .console {
+      margin-top: 14px;
+      background: #07111f;
+      color: #bfffd2;
+      font-family: Consolas, monospace;
+      min-height: 150px;
+      border-radius: 12px;
+      padding: 13px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .results {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .resultBox {
+      border-radius: 11px;
+      padding: 12px;
+      background: #eef5fb;
+      border: 1px solid #dbe6ef;
+    }
+
+    .resultBox small {
+      color: #637486;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .resultBox strong {
+      color: #083b75;
+      font-size: 18px;
+    }
+
+    .alertBox {
+      display: none;
+      margin-top: 14px;
+      border-radius: 12px;
+      padding: 14px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .success {
+      background: #e8f8ee;
+      color: #126132;
+      border: 1px solid #78c894;
+    }
+
+    .error {
+      background: #ffe9e9;
+      color: #9f1717;
+      border: 1px solid #e68e8e;
+      font-size: 18px;
+    }
+
+    .info {
+      margin-top: 12px;
+      background: #f6f8fa;
+      border-left: 4px solid #0a67c7;
+      padding: 11px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media(max-width: 980px) {
+      .main { grid-template-columns: 1fr; }
+      .problemCard { grid-template-columns: repeat(2, 1fr); }
+      .newProblem { grid-column: 1/-1; }
+      canvas { height: 520px; }
+      .robotArea { min-height: 520px; }
+    }
+
+    @media(max-width: 600px) {
+      .problemCard { grid-template-columns: 1fr 1fr; }
+      .actions { grid-template-columns: 1fr; }
+      .results { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Laboratório Arduino + Jacobiana</h1>
+  <p>Calcule a Jacobiana à mão, programe os valores e teste o manipulador.</p>
+</header>
+
+<div class="topData">
+  <div class="problemCard">
+    <div class="datum">
+      <small>L₁</small>
+      <strong id="L1View">1.20 m</strong>
+    </div>
+
+    <div class="datum">
+      <small>L₂</small>
+      <strong id="L2View">0.80 m</strong>
+    </div>
+
+    <div class="datum">
+      <small>θ₁</small>
+      <strong id="T1View">30°</strong>
+    </div>
+
+    <div class="datum">
+      <small>θ₂</small>
+      <strong id="T2View">60°</strong>
+    </div>
+
+    <button class="newProblem" id="newProblemBtn">Novo problema</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <section class="card">
+    <div class="cardHeader">Manipulador</div>
+
+    <div class="robotArea">
+      <canvas id="robotCanvas"></canvas>
+
+      <div class="robotStatus" id="robotStatus">
+        <strong>Estado:</strong> aguardando código.
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="cardHeader">Arduino / C++ didático</div>
+
+    <div class="editorWrap">
+
+      <div class="editorTitle">
+        <strong>Digite a Jacobiana calculada</strong>
+        <span style="font-size:12px;color:#6b7b88;">J11, J12, J21, J22</span>
+      </div>
+
+      <textarea id="codeEditor" spellcheck="false">void setup() {
+  J11 = 0.0;
+  J12 = 0.0;
+  J21 = 0.0;
+  J22 = 0.0;
+
+  omega1 = 0.30;
+  omega2 = 0.20;
+
+  Fx = 10.0;
+  Fy = 15.0;
+}
+
+void loop() {
+  executarMovimento();
+}</textarea>
+
+      <div class="actions">
+        <button class="runBtn" id="runBtn">Compilar / Executar</button>
+        <button class="resetBtn" id="resetBtn">Reiniciar braço</button>
+        <button class="exampleBtn" id="clearBtn">Limpar Jacobiana</button>
+      </div>
+
+      <div class="console" id="console">Arduino virtual pronto.
+Calcule a Jacobiana à mão e digite os quatro elementos no código.</div>
+
+      <div class="results">
+        <div class="resultBox">
+          <small>vₓ</small>
+          <strong id="vxOut">—</strong>
+        </div>
+        <div class="resultBox">
+          <small>vᵧ</small>
+          <strong id="vyOut">—</strong>
+        </div>
+        <div class="resultBox">
+          <small>ω₁</small>
+          <strong id="w1Out">—</strong>
+        </div>
+        <div class="resultBox">
+          <small>ω₂</small>
+          <strong id="w2Out">—</strong>
+        </div>
+        <div class="resultBox">
+          <small>Força</small>
+          <strong id="forceOut">—</strong>
+        </div>
+        <div class="resultBox">
+          <small>Torques</small>
+          <strong id="torqueOut">—</strong>
+        </div>
+      </div>
+
+      <div id="successAlert" class="alertBox success">
+        Jacobiana correta! Manipulador executando a tarefa.
+      </div>
+
+      <div id="errorAlert" class="alertBox error">
+        JACOBIANA ERRADA — TENTE NOVAMENTE
+      </div>
+
+      <div class="info">
+        O sistema não mostra a Jacobiana correta. Ela é calculada internamente apenas para conferir os valores digitados.
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script>
+const canvas = document.getElementById("robotCanvas");
+const ctx = canvas.getContext("2d");
+
+const L1View = document.getElementById("L1View");
+const L2View = document.getElementById("L2View");
+const T1View = document.getElementById("T1View");
+const T2View = document.getElementById("T2View");
+
+const codeEditor = document.getElementById("codeEditor");
+const consoleEl = document.getElementById("console");
+
+const runBtn = document.getElementById("runBtn");
+const resetBtn = document.getElementById("resetBtn");
+const clearBtn = document.getElementById("clearBtn");
+const newProblemBtn = document.getElementById("newProblemBtn");
+
+const successAlert = document.getElementById("successAlert");
+const errorAlert = document.getElementById("errorAlert");
+
+const robotStatus = document.getElementById("robotStatus");
+
+const vxOut = document.getElementById("vxOut");
+const vyOut = document.getElementById("vyOut");
+const w1Out = document.getElementById("w1Out");
+const w2Out = document.getElementById("w2Out");
+const forceOut = document.getElementById("forceOut");
+const torqueOut = document.getElementById("torqueOut");
+
+let problem = {
+  L1: 1.2,
+  L2: 0.8,
+  t1: 30,
+  t2: 60
+};
+
+let visual = {
+  t1: 0,
+  t2: 0,
+  broken: false,
+  phase: "idle",
+  weightY: 0
+};
+
+let animFrame = null;
+let beepCtx = null;
+
+function degToRad(d) {
+  return d * Math.PI / 180;
+}
+
+function calcTrueJacobian() {
+  const t1 = degToRad(problem.t1);
+  const t2 = degToRad(problem.t2);
+
+  const J11 =
+    -problem.L1 * Math.sin(t1)
+    -problem.L2 * Math.sin(t1+t2);
+
+  const J12 =
+    -problem.L2 * Math.sin(t1+t2);
+
+  const J21 =
+    problem.L1 * Math.cos(t1)
+    +problem.L2 * Math.cos(t1+t2);
+
+  const J22 =
+    problem.L2 * Math.cos(t1+t2);
+
+  return {J11,J12,J21,J22};
+}
+
+function parseVariable(name, code) {
+  const re = new RegExp(name + "\\s*=\\s*(-?\\d+(?:[\\.,]\\d+)?)\\s*;");
+  const m = code.match(re);
+  if (!m) return null;
+  return parseFloat(m[1].replace(",", "."));
+}
+
+function parseCode() {
+  const code = codeEditor.value;
+
+  return {
+    J11: parseVariable("J11", code),
+    J12: parseVariable("J12", code),
+    J21: parseVariable("J21", code),
+    J22: parseVariable("J22", code),
+    omega1: parseVariable("omega1", code),
+    omega2: parseVariable("omega2", code),
+    Fx: parseVariable("Fx", code),
+    Fy: parseVariable("Fy", code)
+  };
+}
+
+function near(a,b,tol=0.025) {
+  return Number.isFinite(a) && Math.abs(a-b) <= tol;
+}
+
+function validateJacobian(userJ) {
+  const correct = calcTrueJacobian();
+
+  return (
+    near(userJ.J11, correct.J11) &&
+    near(userJ.J12, correct.J12) &&
+    near(userJ.J21, correct.J21) &&
+    near(userJ.J22, correct.J22)
+  );
+}
+
+function calcOutputs(data) {
+  const vx =
+    data.J11*data.omega1 +
+    data.J12*data.omega2;
+
+  const vy =
+    data.J21*data.omega1 +
+    data.J22*data.omega2;
+
+  const tau1 =
+    data.J11*data.Fx +
+    data.J21*data.Fy;
+
+  const tau2 =
+    data.J12*data.Fx +
+    data.J22*data.Fy;
+
+  return {vx,vy,tau1,tau2};
+}
+
+function format(n) {
+  if (!Number.isFinite(n)) return "—";
+  if (Math.abs(n)<0.0005) n = 0;
+  return n.toFixed(3);
+}
+
+function showOutputs(data, out) {
+  vxOut.textContent = format(out.vx) + " m/s";
+  vyOut.textContent = format(out.vy) + " m/s";
+  w1Out.textContent = format(data.omega1) + " rad/s";
+  w2Out.textContent = format(data.omega2) + " rad/s";
+
+  const Fmag = Math.hypot(data.Fx,data.Fy);
+  forceOut.textContent = format(Fmag) + " N";
+
+  torqueOut.textContent =
+    "τ₁=" + format(out.tau1) +
+    " | τ₂=" + format(out.tau2) + " N·m";
+}
+
+function playErrorSound() {
+  try {
+    if (!beepCtx) {
+      beepCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    const osc = beepCtx.createOscillator();
+    const gain = beepCtx.createGain();
+
+    osc.type = "square";
+    osc.frequency.setValueAtTime(220, beepCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(90, beepCtx.currentTime + 0.45);
+
+    gain.gain.setValueAtTime(0.18, beepCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, beepCtx.currentTime + 0.5);
+
+    osc.connect(gain);
+    gain.connect(beepCtx.destination);
+
+    osc.start();
+    osc.stop(beepCtx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+
+  ctx.setTransform(
+    devicePixelRatio,0,0,devicePixelRatio,0,0
+  );
+
+  draw();
+}
+
+window.addEventListener("resize",resizeCanvas);
+
+function origin() {
+  return {
+    x: canvas.clientWidth * 0.43,
+    y: canvas.clientHeight * 0.72
+  };
+}
+
+function scaleForRobot() {
+  return Math.min(
+    canvas.clientWidth * 0.28 / (problem.L1+problem.L2),
+    canvas.clientHeight * 0.30 / (problem.L1+problem.L2)
+  );
+}
+
+function worldToScreen(x,y) {
+  const o = origin();
+  const s = scaleForRobot();
+
+  return {
+    x:o.x + x*s,
+    y:o.y - y*s
+  };
+}
+
+function getRobotPoints() {
+  const t1 = degToRad(visual.t1);
+  const t2 = degToRad(visual.t2);
+
+  const x1 = problem.L1*Math.cos(t1);
+  const y1 = problem.L1*Math.sin(t1);
+
+  const x2 = x1 + problem.L2*Math.cos(t1+t2);
+  const y2 = y1 + problem.L2*Math.sin(t1+t2);
+
+  return {
+    p0:worldToScreen(0,0),
+    p1:worldToScreen(x1,y1),
+    p2:worldToScreen(x2,y2)
+  };
+}
+
+function drawBackground() {
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+
+  const g = ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,"#fbfdff");
+  g.addColorStop(1,"#e8f0f6");
+
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.strokeStyle = "rgba(20,55,85,.08)";
+  ctx.lineWidth = 1;
+
+  for(let x=0;x<w;x+=45) {
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,h);
+    ctx.stroke();
+  }
+
+  for(let y=0;y<h;y+=45) {
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(w,y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle="#687888";
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(0,h*.78);
+  ctx.lineTo(w,h*.78);
+  ctx.stroke();
+}
+
+function drawBase(p) {
+  ctx.save();
+
+  ctx.fillStyle="#1b2d3d";
+  ctx.fillRect(p.x-48,p.y+10,96,34);
+
+  ctx.beginPath();
+  ctx.ellipse(p.x,p.y+10,48,14,0,0,Math.PI*2);
+  ctx.fillStyle="#3b5367";
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawLink(a,b) {
+  ctx.save();
+
+  ctx.lineCap="round";
+
+  ctx.strokeStyle="#0c2841";
+  ctx.lineWidth=36;
+  ctx.beginPath();
+  ctx.moveTo(a.x,a.y);
+  ctx.lineTo(b.x,b.y);
+  ctx.stroke();
+
+  const g=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+  g.addColorStop(0,"#8799a8");
+  g.addColorStop(.45,"#f4f8fb");
+  g.addColorStop(1,"#9eafbb");
+
+  ctx.strokeStyle=g;
+  ctx.lineWidth=26;
+  ctx.beginPath();
+  ctx.moveTo(a.x,a.y);
+  ctx.lineTo(b.x,b.y);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawJoint(p,r=20) {
+  ctx.save();
+
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,r+5,0,Math.PI*2);
+  ctx.fillStyle="#0b2944";
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,r,0,Math.PI*2);
+  ctx.fillStyle="#dfe7ed";
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,8,0,Math.PI*2);
+  ctx.fillStyle="#f4c542";
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawGripper(p) {
+  ctx.save();
+
+  ctx.strokeStyle="#183247";
+  ctx.lineWidth=6;
+  ctx.lineCap="round";
+
+  ctx.beginPath();
+  ctx.moveTo(p.x,p.y);
+  ctx.lineTo(p.x+28,p.y-12);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(p.x,p.y);
+  ctx.lineTo(p.x+28,p.y+12);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawWeight(p,held) {
+  const yGround=canvas.clientHeight*.78;
+
+  let x;
+  let y;
+
+  if(held) {
+    x=p.x+32;
+    y=p.y+visual.weightY;
+  } else {
+    x=canvas.clientWidth*.72;
+    y=yGround-22;
+  }
+
+  ctx.save();
+
+  ctx.fillStyle="#374957";
+  ctx.fillRect(x-22,y-20,44,36);
+
+  ctx.fillStyle="#24323d";
+  ctx.beginPath();
+  ctx.arc(x,y-20,10,Math.PI,0);
+  ctx.strokeStyle="#24323d";
+  ctx.lineWidth=6;
+  ctx.stroke();
+
+  ctx.fillStyle="#fff";
+  ctx.font="bold 12px Arial";
+  ctx.fillText("PESO",x-17,y+3);
+
+  ctx.restore();
+}
+
+function drawBroken(parts) {
+  const p=parts;
+
+  ctx.save();
+  ctx.translate(0,20);
+
+  drawLink(
+    {x:p.p0.x-15,y:p.p0.y+40},
+    {x:p.p1.x-45,y:p.p1.y+85}
+  );
+
+  drawLink(
+    {x:p.p1.x+60,y:p.p1.y+110},
+    {x:p.p2.x+100,y:p.p2.y+170}
+  );
+
+  drawJoint({x:p.p0.x,y:p.p0.y+15},19);
+  drawJoint({x:p.p1.x+35,y:p.p1.y+85},18);
+
+  ctx.restore();
+}
+
+function draw() {
+  drawBackground();
+
+  const pts=getRobotPoints();
+
+  drawBase(pts.p0);
+
+  if(visual.broken) {
+    drawBroken(pts);
+    drawWeight(pts.p2,false);
+    return;
+  }
+
+  drawLink(pts.p0,pts.p1);
+  drawLink(pts.p1,pts.p2);
+
+  drawJoint(pts.p0,22);
+  drawJoint(pts.p1,20);
+  drawJoint(pts.p2,16);
+
+  drawGripper(pts.p2);
+
+  drawWeight(
+    pts.p2,
+    visual.phase==="lifting" || visual.phase==="done"
+  );
+}
+
+function ease(t) {
+  return t<.5
+    ? 2*t*t
+    : 1-Math.pow(-2*t+2,2)/2;
+}
+
+function animateCorrect() {
+  cancelAnimationFrame(animFrame);
+
+  visual.broken=false;
+  visual.phase="approach";
+  visual.t1=0;
+  visual.t2=0;
+  visual.weightY=0;
+
+  const start=performance.now();
+
+  function frame(now) {
+    const elapsed=now-start;
+
+    if(elapsed < 1800) {
+      const k=ease(elapsed/1800);
+      visual.t1=problem.t1*k;
+      visual.t2=problem.t2*k;
+      robotStatus.innerHTML="<strong>Estado:</strong> posicionando o manipulador.";
+    }
+    else if(elapsed < 2900) {
+      visual.t1=problem.t1;
+      visual.t2=problem.t2;
+      visual.phase="lifting";
+      visual.weightY=-(elapsed-1800)/1100*90;
+      robotStatus.innerHTML="<strong>Estado:</strong> peso agarrado — levantando.";
+    }
+    else {
+      visual.phase="done";
+      visual.weightY=-90;
+      robotStatus.innerHTML="<strong>Estado:</strong> tarefa concluída.";
+      draw();
+      return;
+    }
+
+    draw();
+    animFrame=requestAnimationFrame(frame);
+  }
+
+  animFrame=requestAnimationFrame(frame);
+}
+
+function animateError() {
+  cancelAnimationFrame(animFrame);
+
+  visual.broken=false;
+  visual.phase="error";
+  visual.t1=problem.t1*.45;
+  visual.t2=problem.t2*.45;
+
+  draw();
+
+  setTimeout(()=>{
+    visual.broken=true;
+    robotStatus.innerHTML="<strong>Falha:</strong> Jacobiana incorreta.";
+    playErrorSound();
+    draw();
+  },500);
+}
+
+function resetRobot() {
+  cancelAnimationFrame(animFrame);
+
+  visual={
+    t1:0,
+    t2:0,
+    broken:false,
+    phase:"idle",
+    weightY:0
+  };
+
+  successAlert.style.display="none";
+  errorAlert.style.display="none";
+
+  robotStatus.innerHTML="<strong>Estado:</strong> aguardando código.";
+
+  draw();
+}
+
+function clearOutputs() {
+  vxOut.textContent="—";
+  vyOut.textContent="—";
+  w1Out.textContent="—";
+  w2Out.textContent="—";
+  forceOut.textContent="—";
+  torqueOut.textContent="—";
+}
+
+function runProgram() {
+  successAlert.style.display="none";
+  errorAlert.style.display="none";
+
+  const data=parseCode();
+
+  const required=[
+    "J11","J12","J21","J22",
+    "omega1","omega2","Fx","Fy"
+  ];
+
+  for(const key of required) {
+    if(!Number.isFinite(data[key])) {
+      consoleEl.textContent=
+        "Erro de compilação:\n" +
+        "Não foi possível localizar o valor de " + key + ".";
+      return;
+    }
+  }
+
+  consoleEl.textContent=
+    "Compilando...\n" +
+    "Código aceito.\n" +
+    "Validando matriz Jacobiana...";
+
+  const correct=validateJacobian(data);
+
+  if(!correct) {
+    clearOutputs();
+
+    setTimeout(()=>{
+      consoleEl.textContent +=
+        "\nERRO: Jacobiana incompatível com L1, L2, θ1 e θ2.\nTente novamente.";
+
+      errorAlert.style.display="block";
+      animateError();
+    },400);
+
+    return;
+  }
+
+  const out=calcOutputs(data);
+  showOutputs(data,out);
+
+  setTimeout(()=>{
+    consoleEl.textContent +=
+      "\nJacobiana validada.\n" +
+      "Executando manipulador...\n\n" +
+      "vx = " + format(out.vx) + " m/s\n" +
+      "vy = " + format(out.vy) + " m/s\n" +
+      "omega1 = " + format(data.omega1) + " rad/s\n" +
+      "omega2 = " + format(data.omega2) + " rad/s\n" +
+      "tau1 = " + format(out.tau1) + " N.m\n" +
+      "tau2 = " + format(out.tau2) + " N.m";
+
+    successAlert.style.display="block";
+    animateCorrect();
+  },400);
+}
+
+function randomProblem() {
+  const L1s=[0.8,1.0,1.2,1.4];
+  const L2s=[0.6,0.7,0.8,1.0];
+  const ang1=[20,30,40,45,50];
+  const ang2=[30,40,45,50,60];
+
+  problem.L1=L1s[Math.floor(Math.random()*L1s.length)];
+  problem.L2=L2s[Math.floor(Math.random()*L2s.length)];
+  problem.t1=ang1[Math.floor(Math.random()*ang1.length)];
+  problem.t2=ang2[Math.floor(Math.random()*ang2.length)];
+
+  L1View.textContent=problem.L1.toFixed(2)+" m";
+  L2View.textContent=problem.L2.toFixed(2)+" m";
+  T1View.textContent=problem.t1+"°";
+  T2View.textContent=problem.t2+"°";
+
+  clearOutputs();
+  resetRobot();
+
+  consoleEl.textContent=
+    "Novo problema gerado.\n" +
+    "Calcule a Jacobiana à mão antes de programar.";
+}
+
+function clearJacobianFields() {
+  codeEditor.value = codeEditor.value
+    .replace(/J11\s*=\s*-?\d+(?:[.,]\d+)?\s*;/,"J11 = 0.0;")
+    .replace(/J12\s*=\s*-?\d+(?:[.,]\d+)?\s*;/,"J12 = 0.0;")
+    .replace(/J21\s*=\s*-?\d+(?:[.,]\d+)?\s*;/,"J21 = 0.0;")
+    .replace(/J22\s*=\s*-?\d+(?:[.,]\d+)?\s*;/,"J22 = 0.0;");
+}
+
+runBtn.addEventListener("click",runProgram);
+resetBtn.addEventListener("click",resetRobot);
+clearBtn.addEventListener("click",clearJacobianFields);
+newProblemBtn.addEventListener("click",randomProblem);
+
+resizeCanvas();
+draw();
+</script>
+
+</body>
+</html>
